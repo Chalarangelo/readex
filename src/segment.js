@@ -1,6 +1,6 @@
 import { sanitize } from './sanitize.js';
 
-class Segment {
+export class Segment {
   constructor(expression) {
     if (expression instanceof Segment) this.value = expression.value;
     if (expression instanceof RegExp) this.value = expression.source;
