@@ -32,6 +32,13 @@ class Flags {
   }
 }
 
+/**
+ * Converts the given input to a Flags object.
+ *
+ * @param {Object|Flags} flags - The input to be converted to a Flags instance.
+ * @returns {Flags} An Flags object.
+ * @throws {TypeError} If the input is not an object or a Flags instance.
+ */
 export const asFlags = flags => {
   if (flags instanceof Flags) return flags;
   if (!(flags instanceof Object))
