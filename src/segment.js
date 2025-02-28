@@ -1,4 +1,4 @@
-import sanitize from './sanitize.js';
+import { sanitize } from './sanitize.js';
 
 class Segment {
   constructor(expression) {
