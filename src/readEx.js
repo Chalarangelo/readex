@@ -1,4 +1,4 @@
-import Segment from './segment.js';
+import { joinSegments, toSegments } from './segment.js';
 
 const DEFAULT_FLAGS = {
   dotAll: false,
@@ -25,8 +25,7 @@ class ReadEx {
       ...flags,
     };
 
-    const segments = expressions.map(ex => new Segment(ex));
-    this.source = new Segment(segments.map(ex => ex.value).join(''));
+    this.source = joinSegments(toSegments(...expressions));
   }
 
   getFlags() {
