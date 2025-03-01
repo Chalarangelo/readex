@@ -33,6 +33,16 @@ class Group {
   }
 }
 
+/**
+ * Creates a new capturing/non-capturing/named group segment with the provided expressions.
+ *
+ * @param {...any} expressionsAndOptions - The expressions and options to group.
+ *    The last argument can be an options object with the following properties:
+ *      - capture: boolean - Whether the group should be captured.
+ *      - name: string - The name of the group.
+ * @throws {Error} If no expressions are provided.
+ * @returns {Segment} The new group segment.
+ */
 export const group = (...expressionsAndOptions) => {
   if (expressionsAndOptions.length === 0)
     throw new Error('No expressions provided.');
