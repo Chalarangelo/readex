@@ -8,8 +8,9 @@ const DEFAULT_OPTIONS = {
 const OPTIONS_KEYS = Object.keys(DEFAULT_OPTIONS);
 
 const isValidOptions = val =>
-  typeof val === 'object' &&
   val !== null &&
+  typeof val === 'object' &&
+  !(val instanceof RegExp) &&
   Object.keys(val).every(key => OPTIONS_KEYS.includes(key));
 
 class Group {

@@ -18,7 +18,7 @@ describe('toCharacterSet', () => {
     ])(
       'produces a segment that matches the characters exactly (%s) -> (%s)',
       (expression, expected) => {
-        expect(toCharacterSet(expression).value).toEqual(expected);
+        expect(toCharacterSet(expression).source).toEqual(expected);
       }
     );
   });
@@ -31,7 +31,7 @@ describe('toCharacterSet', () => {
     ])(
       'produces a segment that matches the character range (%s) -> (%s)',
       (expression, expected) => {
-        expect(toCharacterSet(expression).value).toEqual(expected);
+        expect(toCharacterSet(expression).source).toEqual(expected);
       }
     );
   });

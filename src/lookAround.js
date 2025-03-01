@@ -4,8 +4,9 @@ import { concat } from './group.js';
 const OPTIONS_KEYS = ['positive', 'negative'];
 
 const isValidOptions = val =>
-  typeof val === 'object' &&
   val !== null &&
+  typeof val === 'object' &&
+  !(val instanceof RegExp) &&
   Object.entries(val).every(
     ([key, value], i) =>
       i === 0 && OPTIONS_KEYS.includes(key) && typeof value === 'boolean'

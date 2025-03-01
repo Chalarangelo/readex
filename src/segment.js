@@ -1,14 +1,18 @@
 import { sanitize } from './sanitize.js';
 
-export class Segment {
+export class Segment extends RegExp {
   constructor(expression) {
-    if (expression instanceof Segment) this.value = expression.value;
-    if (expression instanceof RegExp) this.value = expression.source;
-    if (typeof expression === 'string') this.value = expression;
+    const source =
+      expression instanceof Segment || expression instanceof RegExp
+        ? expression.source
+        : typeof expression === 'string'
+        ? expression
+        : null;
+    super(source);
   }
 
   toString() {
-    return this.value;
+    return this.source;
   }
 }
 

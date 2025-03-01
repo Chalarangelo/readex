@@ -5,7 +5,7 @@ describe('toSegment', () => {
   describe('when value is a Segment instance', () => {
     it('copies the Segment value', () => {
       const segment = toSegment('some value');
-      expect(toSegment(segment).value).toEqual('some value');
+      expect(toSegment(segment).source).toEqual('some value');
     });
   });
 
@@ -16,7 +16,7 @@ describe('toSegment', () => {
       ['special characters', /some value./, 'some value.'],
     ])('and the RegExp contains %s', (_, expression, expected) => {
       it('copies the RegExp source', () => {
-        expect(toSegment(expression).value).toEqual(expected);
+        expect(toSegment(expression).source).toEqual(expected);
       });
     });
   });
@@ -27,7 +27,7 @@ describe('toSegment', () => {
       ['a number', 123, '123'],
     ])('%s', (_, expression, expected) => {
       it('sanitizes the expression', () => {
-        expect(toSegment(expression).value).toEqual(expected);
+        expect(toSegment(expression).source).toEqual(expected);
       });
     });
   });
@@ -51,7 +51,7 @@ describe('toSegments', () => {
     ['multiple RegExps', [/a/, /b/], ['a', 'b']],
   ])('when called with %s', (_, expressions, expected) => {
     it('returns an array of Segment instances', () => {
-      expect(toSegments(...expressions).map(seg => seg.value)).toEqual(
+      expect(toSegments(...expressions).map(seg => seg.source)).toEqual(
         expected
       );
     });
@@ -69,9 +69,9 @@ describe('joinSegments', () => {
     ['a string, a RegExp, and a number', ['a', /b/, 123], ['a', 'b', '123']],
   ])('when called with %s', (_, expressions, expected) => {
     it.each(['', '-', '|'])('and a "%s" separator', separator => {
-      expect(joinSegments(toSegments(...expressions), separator).value).toEqual(
-        expected.join(separator)
-      );
+      expect(
+        joinSegments(toSegments(...expressions), separator).source
+      ).toEqual(expected.join(separator));
     });
   });
 });

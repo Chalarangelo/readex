@@ -79,7 +79,7 @@ describe('lookbehind', () => {
   });
 
   it('should work with multiple patterns', () => {
-    expect(readEx([lookbehind('a', /./), 'b'])).toMatchString('dab');
+    expect(readEx([lookbehind('a', /./), 'b'])).toMatchString('adb');
   });
 
   describe('with negative: true', () => {
