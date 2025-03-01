@@ -54,3 +54,12 @@ export const group = (...expressionsAndOptions) => {
 
   return new Group(expressionsAndOptions).toSegment();
 };
+
+/**
+ * Combines multiple expressions into a single non-capturing group segment.
+ *
+ * @param {...(Segment|RegExp|string)} expressions - The expressions to be combined.
+ * @returns {Segment} The combined expression as a non-capturing group segment.
+ */
+export const concat = (...expressions) =>
+  group(...expressions, { capture: false });

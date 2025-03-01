@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
+import './matchers.js';
+
 import readEx from '#src/readEx.js';
-import { group } from '#src/group.js';
+import { group, concat } from '#src/group.js';
 
 describe('group', () => {
   describe.each([
@@ -95,5 +97,17 @@ describe('group', () => {
       expect(matches[2]).not.toBe('b');
       expect(matches.groups.myName).toBe('d');
     });
+  });
+});
+
+describe('concat', () => {
+  it.each([
+    ['with strings', ['a', 'b', 'c']],
+    ['with regexps', [/a/, /b/, /c/]],
+    ['with a mix of strings and regexps', ['a', /b/, 'c']],
+  ])('should combine expressions %s', (_, expressions) => {
+    expect(readEx([/^/, concat(...expressions), /$/])).toMatchString('abc');
+    expect(readEx([/^/, concat(...expressions), /$/])).not.toMatchString('a');
+    expect(readEx([/^/, concat(...expressions), /$/])).not.toMatchString('ab');
   });
 });
