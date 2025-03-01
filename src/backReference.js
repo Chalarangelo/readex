@@ -1,4 +1,4 @@
-import { Segment, toSegments, joinSegments } from './segment.js';
+import { Segment } from './segment.js';
 
 /**
  * Generates a back reference segment.
