@@ -30,6 +30,7 @@ class Quantifier {
     return {
       maybe: '?',
       oneOrMore: '+',
+      zeroOrMore: '*',
     }[this.type];
   }
 
@@ -43,6 +44,10 @@ class Quantifier {
 
   static oneOrMore(expressions, options) {
     return new Quantifier('oneOrMore', expressions, options);
+  }
+
+  static zeroOrMore(expressions, options) {
+    return new Quantifier('zeroOrMore', expressions, options);
   }
 }
 
@@ -87,5 +92,21 @@ export const maybe = (...expressionsAndOptions) =>
  */
 export const oneOrMore = (...expressionsAndOptions) =>
   Quantifier.oneOrMore(
+    ...extractOptionsAndExpressions(expressionsAndOptions)
+  ).toSegment();
+
+/**
+ * Creates a new non-capturing group segment that matches
+ * zero or more of the provided expressions.
+ *
+ * @param {...any} expressionsAndOptions - The expressions and options to group.
+ *   The last argument can be an options object with one of the following properties:
+ *    - greedy: boolean - Whether the group should be greedy (default).
+ *    - lazy: boolean - Whether the group should be lazy.
+ * @throws {Error} If no expressions are provided.
+ * @returns {Segment} The new group segment.
+ */
+export const zeroOrMore = (...expressionsAndOptions) =>
+  Quantifier.zeroOrMore(
     ...extractOptionsAndExpressions(expressionsAndOptions)
   ).toSegment();

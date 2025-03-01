@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import './matchers.js';
 
 import readEx from '#src/readEx.js';
-import { maybe, oneOrMore } from '#src/quantifiers.js';
+import { maybe, oneOrMore, zeroOrMore } from '#src/quantifiers.js';
 
 describe('maybe', () => {
   it('should match the pattern if it is present', () => {
@@ -83,15 +83,61 @@ describe('oneOrMore', () => {
     });
 
     it('should throw an error if given a non-boolean value', () => {
-      expect(() => maybe('a', { lazy: 'true' })).toThrow();
+      expect(() => oneOrMore('a', { lazy: 'true' })).toThrow();
     });
 
     it('should throw an error if given an invalid option', () => {
-      expect(() => maybe('a', { invalid: true })).toThrow();
+      expect(() => oneOrMore('a', { invalid: true })).toThrow();
     });
 
     it('should throw an error if given multiple options', () => {
-      expect(() => maybe('a', { lazy: true, greedy: false })).toThrow();
+      expect(() => oneOrMore('a', { lazy: true, greedy: false })).toThrow();
+    });
+  });
+});
+
+describe('zeroOrMore', () => {
+  it('should match if the pattern is not present', () => {
+    expect(readEx([/^/, zeroOrMore('a'), /$/])).toMatchString('');
+  });
+
+  it('should match the pattern once', () => {
+    expect(readEx([/^/, zeroOrMore('a'), /$/])).toMatchString('a');
+  });
+
+  it('should match the pattern multiple times', () => {
+    expect(readEx([/^/, zeroOrMore('a'), /$/])).toMatchString('aaa');
+  });
+
+  it('should be greedy by default', () => {
+    const regexp = readEx(['b', zeroOrMore(/./), 'b']);
+    const [match] = regexp.exec('bab bcb');
+    expect(match).toBe('bab bcb');
+  });
+
+  describe('with options', () => {
+    it('should be lazy if lazy: true', () => {
+      const regexp = readEx(['b', zeroOrMore(/./, { lazy: true }), 'b']);
+      const [match] = regexp.exec('bab bcb');
+      expect(match).toBe('bab');
+    });
+
+    it('should be lazy if greedy: false', () => {
+      const regexp = readEx(['b', zeroOrMore(/./, { greedy: false }), 'b']);
+      const [match] = regexp.exec('bab bcb');
+      expect(match).toBe('bab');
+    });
+
+    it('should throw an error if given a non-boolean value', () => {
+      expect(() => zeroOrMore('a', { lazy: 'true' })).toThrow();
+    });
+
+    it('should throw an error if given an invalid option', () => {
+      expect(() => zeroOrMore('a', { invalid: true })).toThrow();
+    });
+
+    it('should throw an error if given multiple options', () => {
+      expect(() => zeroOrMore('a', { lazy: true, greedy: false })).toThrow();
     });
   });
 });
