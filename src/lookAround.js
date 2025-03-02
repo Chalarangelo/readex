@@ -10,11 +10,11 @@ class LookAround {
     this.type = type;
     this.expression = concat(...toSegments(...expressions));
 
-    this.options =
+    this.direction =
       Object.keys(options).length &&
       (options.negative === true || options.positive === false)
-        ? { negative: true }
-        : { negative: false };
+        ? 'negative'
+        : 'positive';
   }
 
   toSegment() {
@@ -31,7 +31,7 @@ class LookAround {
         positive: '?<=',
         negative: '?<!',
       },
-    }[this.type][this.options.negative ? 'negative' : 'positive'];
+    }[this.type][this.direction];
   }
 
   static lookeahead(expressions, options = {}) {
