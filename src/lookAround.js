@@ -1,28 +1,9 @@
 import { Segment, toSegments } from './segment.js';
 import { concat } from './group.js';
+import { createOptionsValidator, createOptionsExtractor } from './utils.js';
 
-const OPTIONS_KEYS = ['positive', 'negative'];
-
-const isValidOptions = val =>
-  val !== null &&
-  typeof val === 'object' &&
-  !(val instanceof RegExp) &&
-  Object.entries(val).every(
-    ([key, value], i) =>
-      i === 0 && OPTIONS_KEYS.includes(key) && typeof value === 'boolean'
-  );
-
-const extractOptionsAndExpressions = expressionsAndOptions => {
-  if (expressionsAndOptions.length === 0)
-    throw new Error('No expressions provided.');
-
-  const last = expressionsAndOptions[expressionsAndOptions.length - 1];
-
-  if (expressionsAndOptions.length !== 1 && isValidOptions(last))
-    return [expressionsAndOptions.slice(0, -1), last];
-
-  return [expressionsAndOptions];
-};
+const isValidOptions = createOptionsValidator(['positive', 'negative'], true);
+const extractOptionsAndExpressions = createOptionsExtractor(isValidOptions);
 
 class LookAround {
   constructor(type, expressions, options = {}) {

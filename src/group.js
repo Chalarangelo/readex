@@ -1,17 +1,13 @@
 import { Segment, toSegments, joinSegments } from './segment.js';
+import { createOptionsValidator, createOptionsExtractor } from './utils.js';
 
 const DEFAULT_OPTIONS = {
   capture: true,
   name: null,
 };
 
-const OPTIONS_KEYS = Object.keys(DEFAULT_OPTIONS);
-
-const isValidOptions = val =>
-  val !== null &&
-  typeof val === 'object' &&
-  !(val instanceof RegExp) &&
-  Object.keys(val).every(key => OPTIONS_KEYS.includes(key));
+const isValidOptions = createOptionsValidator(Object.keys(DEFAULT_OPTIONS));
+const extractOptionsAndExpressions = createOptionsExtractor(isValidOptions);
 
 class Group {
   constructor(expressions, options = {}) {
@@ -44,17 +40,8 @@ class Group {
  * @throws {Error} If no expressions are provided.
  * @returns {Segment} The new group segment.
  */
-export const group = (...expressionsAndOptions) => {
-  if (expressionsAndOptions.length === 0)
-    throw new Error('No expressions provided.');
-
-  const last = expressionsAndOptions[expressionsAndOptions.length - 1];
-
-  if (expressionsAndOptions.length !== 1 && isValidOptions(last))
-    return new Group(expressionsAndOptions.slice(0, -1), last).toSegment();
-
-  return new Group(expressionsAndOptions).toSegment();
-};
+export const group = (...expressionsAndOptions) =>
+  new Group(...extractOptionsAndExpressions(expressionsAndOptions)).toSegment();
 
 /**
  * Combines multiple expressions into a single non-capturing group segment.

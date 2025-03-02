@@ -1,7 +1,6 @@
 import { Segment, toSegments } from './segment.js';
 import { group } from './group.js';
-
-const OPTIONS_KEYS = ['greedy', 'lazy'];
+import { createOptionsValidator } from './utils.js';
 
 const isNil = val => val === undefined || val === null;
 
@@ -10,15 +9,7 @@ const isValidQuantity = val =>
 
 const isValidTimes = val => Number.isInteger(val) && val > 0;
 
-// Note: The last check returns true if the object is empty.
-const isValidOptions = val =>
-  !isNil(val) &&
-  typeof val === 'object' &&
-  !(val instanceof RegExp) &&
-  Object.entries(val).every(
-    ([key, value], i) =>
-      i === 0 && OPTIONS_KEYS.includes(key) && typeof value === 'boolean'
-  );
+const isValidOptions = createOptionsValidator(['greedy', 'lazy'], true);
 
 const isValidOptionsWithMinMax = val => {
   const { min, max, times, ...options } = val;
