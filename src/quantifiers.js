@@ -1,6 +1,6 @@
 import { Segment, toSegments } from './segment.js';
 import { group } from './group.js';
-import { createOptionsValidator } from './utils.js';
+import { createOptionsValidator, createOptionsExtractor } from './utils.js';
 
 const isNil = val => val === undefined || val === null;
 
@@ -40,6 +40,12 @@ const isValidOptionsWithMinMax = val => {
 
   return true;
 };
+
+const extractOptionsAndExpressionsWithoutMinMax =
+  createOptionsExtractor(isValidOptions);
+const extractOptionsAndExpressionsWithMinMax = createOptionsExtractor(
+  isValidOptionsWithMinMax
+);
 
 class Quantifier {
   constructor(type, expressions, options = {}) {
@@ -104,20 +110,10 @@ class Quantifier {
 const extractOptionsAndExpressions = (
   expressionsAndOptions,
   includeMinMax = false
-) => {
-  if (expressionsAndOptions.length === 0)
-    throw new Error('No expressions provided.');
-
-  const last = expressionsAndOptions[expressionsAndOptions.length - 1];
-
-  const checkOptions = includeMinMax
-    ? isValidOptionsWithMinMax
-    : isValidOptions;
-  if (expressionsAndOptions.length !== 1 && checkOptions(last))
-    return [expressionsAndOptions.slice(0, -1), last];
-
-  return [expressionsAndOptions];
-};
+) =>
+  includeMinMax
+    ? extractOptionsAndExpressionsWithMinMax(expressionsAndOptions)
+    : extractOptionsAndExpressionsWithoutMinMax(expressionsAndOptions);
 
 /**
  * Creates a new non-capturing group segment that optionally matches
