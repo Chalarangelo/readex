@@ -24,3 +24,7 @@ export const createOptionsExtractor =
 
     return [expressionsAndOptions];
   };
+
+export const isNil = val => val === undefined || val === null;
+export const isPositiveInteger = val => Number.isInteger(val) && val > 0;
+export const isNonNegativeInteger = val => Number.isInteger(val) && val >= 0;

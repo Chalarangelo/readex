@@ -1,13 +1,15 @@
 import { Segment, toSegments } from './segment.js';
 import { group } from './group.js';
-import { createOptionsValidator, createOptionsExtractor } from './utils.js';
+import {
+  createOptionsValidator,
+  createOptionsExtractor,
+  isNil,
+  isPositiveInteger,
+  isNonNegativeInteger,
+} from './utils.js';
 
-const isNil = val => val === undefined || val === null;
-
-const isValidQuantity = val =>
-  isNil(val) || (Number.isInteger(val) && val >= 0);
-
-const isValidTimes = val => Number.isInteger(val) && val > 0;
+const isValidQuantity = val => isNil(val) || isNonNegativeInteger(val);
+const isValidTimes = isPositiveInteger;
 
 const isValidOptions = createOptionsValidator(['greedy', 'lazy'], true);
 
@@ -49,61 +51,29 @@ const extractOptionsAndExpressionsWithMinMax = createOptionsExtractor(
 
 class Quantifier {
   constructor(type, expressions, options = {}) {
-    this.type = type;
     this.expression = group(...toSegments(...expressions), { capture: false });
-
-    this.options =
-      Object.keys(options).length &&
-      (options.lazy === true || options.greedy === false)
-        ? { lazy: true }
-        : { lazy: false };
+    this.suffix = '';
 
     if (type === 'repeat') {
-      this.min = options.min ?? options.times ?? null;
-      this.max = options.max ?? options.times ?? null;
-    }
+      const min = options.min ?? options.times ?? 0;
+      const max = options.max ?? options.times ?? '';
+      this.suffix = min === max ? `{${min}}` : `{${min},${max}}`;
+    } else
+      this.suffix = {
+        maybe: '?',
+        oneOrMore: '+',
+        zeroOrMore: '*',
+      }[type];
+
+    if (
+      Object.keys(options).length &&
+      (options.lazy === true || options.greedy === false)
+    )
+      this.suffix += '?';
   }
 
   toSegment() {
-    return new Segment(`${this.expression}${this.suffix}${this.lazySuffix}`);
-  }
-
-  get suffix() {
-    if (this.type === 'repeat') {
-      if (this.min === null && this.max === null)
-        throw new Error('Invalid quantifier: must have a min or max value.');
-
-      if (this.min === this.max) return `{${this.min}}`;
-      if (this.min === null) return `{0,${this.max}}`;
-      if (this.max === null) return `{${this.min},}`;
-      return `{${this.min},${this.max}}`;
-    }
-
-    return {
-      maybe: '?',
-      oneOrMore: '+',
-      zeroOrMore: '*',
-    }[this.type];
-  }
-
-  get lazySuffix() {
-    return this.options.lazy ? '?' : '';
-  }
-
-  static maybe(expressions, options) {
-    return new Quantifier('maybe', expressions, options);
-  }
-
-  static oneOrMore(expressions, options) {
-    return new Quantifier('oneOrMore', expressions, options);
-  }
-
-  static zeroOrMore(expressions, options) {
-    return new Quantifier('zeroOrMore', expressions, options);
-  }
-
-  static repeat(expressions, options) {
-    return new Quantifier('repeat', expressions, options);
+    return new Segment(`${this.expression}${this.suffix}`);
   }
 }
 
@@ -127,7 +97,8 @@ const extractOptionsAndExpressions = (
  * @returns {Segment} The new group segment.
  */
 export const maybe = (...expressionsAndOptions) =>
-  Quantifier.maybe(
+  new Quantifier(
+    'maybe',
     ...extractOptionsAndExpressions(expressionsAndOptions)
   ).toSegment();
 
@@ -143,7 +114,8 @@ export const maybe = (...expressionsAndOptions) =>
  * @returns {Segment} The new group segment.
  */
 export const oneOrMore = (...expressionsAndOptions) =>
-  Quantifier.oneOrMore(
+  new Quantifier(
+    'oneOrMore',
     ...extractOptionsAndExpressions(expressionsAndOptions)
   ).toSegment();
 
@@ -159,7 +131,8 @@ export const oneOrMore = (...expressionsAndOptions) =>
  * @returns {Segment} The new group segment.
  */
 export const zeroOrMore = (...expressionsAndOptions) =>
-  Quantifier.zeroOrMore(
+  new Quantifier(
+    'zeroOrMore',
     ...extractOptionsAndExpressions(expressionsAndOptions)
   ).toSegment();
 
@@ -178,6 +151,7 @@ export const zeroOrMore = (...expressionsAndOptions) =>
  * @returns {Segment} The new group segment.
  */
 export const repeat = (...expressionsAndOptions) =>
-  Quantifier.repeat(
+  new Quantifier(
+    'repeat',
     ...extractOptionsAndExpressions(expressionsAndOptions, true)
   ).toSegment();

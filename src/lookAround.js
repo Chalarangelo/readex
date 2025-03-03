@@ -7,39 +7,17 @@ const extractOptionsAndExpressions = createOptionsExtractor(isValidOptions);
 
 class LookAround {
   constructor(type, expressions, options = {}) {
-    this.type = type;
     this.expression = concat(...toSegments(...expressions));
-
-    this.direction =
+    this.prefix = `?${type === 'lookbehind' ? '<' : ''}`;
+    this.prefix +=
       Object.keys(options).length &&
       (options.negative === true || options.positive === false)
-        ? 'negative'
-        : 'positive';
+        ? '!'
+        : '=';
   }
 
   toSegment() {
     return new Segment(`(${this.prefix}${this.expression})`);
-  }
-
-  get prefix() {
-    return {
-      lookahead: {
-        positive: '?=',
-        negative: '?!',
-      },
-      lookbehind: {
-        positive: '?<=',
-        negative: '?<!',
-      },
-    }[this.type][this.direction];
-  }
-
-  static lookeahead(expressions, options = {}) {
-    return new LookAround('lookahead', expressions, options);
-  }
-
-  static lookbehind(expressions, options = {}) {
-    return new LookAround('lookbehind', expressions, options);
   }
 }
 
@@ -54,7 +32,8 @@ class LookAround {
  * @returns {Segment} The new lookahead group segment.
  */
 export const lookahead = (...expressionsAndOptions) =>
-  LookAround.lookeahead(
+  new LookAround(
+    'lookahead',
     ...extractOptionsAndExpressions(expressionsAndOptions)
   ).toSegment();
 
@@ -69,6 +48,7 @@ export const lookahead = (...expressionsAndOptions) =>
  * @returns {Segment} The new lookbehind group segment.
  */
 export const lookbehind = (...expressionsAndOptions) =>
-  LookAround.lookbehind(
+  new LookAround(
+    'lookbehind',
     ...extractOptionsAndExpressions(expressionsAndOptions)
   ).toSegment();

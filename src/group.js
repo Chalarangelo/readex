@@ -7,18 +7,26 @@ const DEFAULT_OPTIONS = {
 };
 
 const isValidOptions = createOptionsValidator(Object.keys(DEFAULT_OPTIONS));
-const extractOptionsAndExpressions = createOptionsExtractor(isValidOptions);
+const isValidOptionsWithNameCheck = val => {
+  if (!isValidOptions(val)) return false;
+
+  const { name = null, capture = true } = val;
+
+  if (name && typeof name !== 'string')
+    throw new TypeError('Invalid group name. Must be a string.');
+  if (name && !capture) throw new Error('Named groups must be captured.');
+
+  return true;
+};
+
+const extractOptionsAndExpressions = createOptionsExtractor(
+  isValidOptionsWithNameCheck
+);
 
 class Group {
   constructor(expressions, options = {}) {
     this.expression = joinSegments(toSegments(...expressions));
     this.options = { ...DEFAULT_OPTIONS, ...options };
-
-    if (this.options.name && typeof this.options.name !== 'string')
-      throw new TypeError('Invalid group name. Must be a string.');
-
-    if (!this.options.capture && this.options.name)
-      throw new Error('Named groups must be captured.');
   }
 
   toSegment() {
