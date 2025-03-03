@@ -3,7 +3,7 @@ import { sanitize } from './sanitize.js';
 export class Segment extends RegExp {
   constructor(expression) {
     const source =
-      expression instanceof Segment || expression instanceof RegExp
+      expression instanceof RegExp
         ? expression.source
         : typeof expression === 'string'
         ? expression
@@ -23,7 +23,6 @@ export class Segment extends RegExp {
  * @returns {Segment} - The resulting Segment instance.
  */
 export const toSegment = expression => {
-  if (expression instanceof Segment) return expression;
   if (expression instanceof RegExp) return new Segment(expression);
   return new Segment(sanitize(expression));
 };
