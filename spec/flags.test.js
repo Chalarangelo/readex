@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { asFlags } from '#src/flags.js';
 
 describe('asFlags', () => {
-  describe.each([
+  it.each([
     [
       'no flags',
       {},
@@ -50,12 +50,6 @@ describe('asFlags', () => {
       'siyu',
     ],
   ])('with %s', (_, flags, expected, expectedString) => {
-    it(`when converted to object should produce correct flags`, () => {
-      expect(asFlags(flags).value).toMatchObject(expected);
-    });
-
-    it(`when converted to string should produce correct value`, () => {
-      expect(asFlags(flags).toString()).toEqual(expectedString);
-    });
+    expect(asFlags(flags)).toEqual(expectedString);
   });
 });

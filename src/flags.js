@@ -16,32 +16,32 @@ const FLAG_MAP = {
   unicode: 'u',
 };
 
-class Flags {
-  constructor(flags) {
-    this.value = {
-      ...DEFAULT_FLAGS,
-      ...flags,
-    };
-  }
+const validateFlag = flag => {
+  if (!Object.keys(DEFAULT_FLAGS).includes(flag))
+    throw new TypeError(`Invalid flag: ${flag}`);
 
-  toString() {
-    return Object.entries(this.value).reduce(
-      (acc, [flag, value]) => (value ? acc + FLAG_MAP[flag] : acc),
-      ''
-    );
-  }
-}
+  return flag;
+};
 
 /**
- * Converts the given input to a Flags object.
+ * Converts the given input to a flags string.
  *
- * @param {Object|Flags} flags - The input to be converted to a Flags instance.
- * @returns {Flags} An Flags object.
- * @throws {TypeError} If the input is not an object or a Flags instance.
+ * @param {Object} flags - The input to be converted to a flags string.
+ * @returns {string} A string representing the flags for the regular expression.
+ * @throws {TypeError} If the input is not an object or if the flags are invalid.
  */
 export const asFlags = flags => {
-  if (flags instanceof Flags) return flags;
   if (!(flags instanceof Object))
     throw new TypeError('flags must be an object');
-  return new Flags(flags);
+
+  return Object.entries(
+    Object.entries(flags).reduce(
+      (acc, [flag, value]) => {
+        if (value !== undefined) acc[validateFlag(flag)] = value;
+
+        return acc;
+      },
+      { ...DEFAULT_FLAGS }
+    )
+  ).reduce((acc, [flag, value]) => (value ? acc + FLAG_MAP[flag] : acc), '');
 };

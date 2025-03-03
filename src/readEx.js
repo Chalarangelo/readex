@@ -1,17 +1,14 @@
 import { joinSegments, toSegments } from './segment.js';
 import { asFlags } from './flags.js';
 
-class ReadEx {
-  constructor(expressions, flags = {}) {
-    this.flags = asFlags(flags);
-    this.source = joinSegments(toSegments(...expressions)).source;
-  }
-
-  toRegExp() {
-    return new RegExp(this.source, this.flags.toString());
-  }
-}
-
-const readEx = (...args) => new ReadEx(...args).toRegExp();
+/**
+ * Creates a new regular expression by joining multiple segments and applying specified flags.
+ *
+ * @param {Array<string|RegExp>} expressions - An array of strings or regular expressions to be joined.
+ * @param {Object} [flags={}] - An optional object specifying the flags to be applied to the regular expression.
+ * @returns {RegExp} The resulting regular expression.
+ */
+const readEx = (expressions, flags = {}) =>
+  new RegExp(joinSegments(toSegments(...expressions)).source, asFlags(flags));
 
 export default readEx;
