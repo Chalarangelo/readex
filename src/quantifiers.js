@@ -49,34 +49,6 @@ const extractOptionsAndExpressionsWithMinMax = createOptionsExtractor(
   isValidOptionsWithMinMax
 );
 
-class Quantifier {
-  constructor(type, expressions, options = {}) {
-    this.expression = group(...toSegments(...expressions), { capture: false });
-    this.suffix = '';
-
-    if (type === 'repeat') {
-      const min = options.min ?? options.times ?? 0;
-      const max = options.max ?? options.times ?? '';
-      this.suffix = min === max ? `{${min}}` : `{${min},${max}}`;
-    } else
-      this.suffix = {
-        maybe: '?',
-        oneOrMore: '+',
-        zeroOrMore: '*',
-      }[type];
-
-    if (
-      Object.keys(options).length &&
-      (options.lazy === true || options.greedy === false)
-    )
-      this.suffix += '?';
-  }
-
-  toSegment() {
-    return new Segment(`${this.expression}${this.suffix}`);
-  }
-}
-
 const extractOptionsAndExpressions = (
   expressionsAndOptions,
   includeMinMax = false
@@ -84,6 +56,26 @@ const extractOptionsAndExpressions = (
   includeMinMax
     ? extractOptionsAndExpressionsWithMinMax(expressionsAndOptions)
     : extractOptionsAndExpressionsWithoutMinMax(expressionsAndOptions);
+
+const createQuantifier = (type, expressions, options = {}) => {
+  const expression = group(...toSegments(...expressions), { capture: false });
+  let suffix = {
+    maybe: '?',
+    oneOrMore: '+',
+    zeroOrMore: '*',
+  }[type];
+
+  if (type === 'repeat') {
+    const min = options.min ?? options.times ?? 0;
+    const max = options.max ?? options.times ?? '';
+    suffix = min === max ? `{${min}}` : `{${min},${max}}`;
+  }
+
+  if (Object.keys(options).length && (options.lazy || !options.greedy))
+    suffix += '?';
+
+  return new Segment(`${expression}${suffix}`);
+};
 
 /**
  * Creates a new non-capturing group segment that optionally matches
@@ -97,10 +89,10 @@ const extractOptionsAndExpressions = (
  * @returns {Segment} The new group segment.
  */
 export const maybe = (...expressionsAndOptions) =>
-  new Quantifier(
+  createQuantifier(
     'maybe',
     ...extractOptionsAndExpressions(expressionsAndOptions)
-  ).toSegment();
+  );
 
 /**
  * Creates a new non-capturing group segment that matches
@@ -114,10 +106,10 @@ export const maybe = (...expressionsAndOptions) =>
  * @returns {Segment} The new group segment.
  */
 export const oneOrMore = (...expressionsAndOptions) =>
-  new Quantifier(
+  createQuantifier(
     'oneOrMore',
     ...extractOptionsAndExpressions(expressionsAndOptions)
-  ).toSegment();
+  );
 
 /**
  * Creates a new non-capturing group segment that matches
@@ -131,10 +123,10 @@ export const oneOrMore = (...expressionsAndOptions) =>
  * @returns {Segment} The new group segment.
  */
 export const zeroOrMore = (...expressionsAndOptions) =>
-  new Quantifier(
+  createQuantifier(
     'zeroOrMore',
     ...extractOptionsAndExpressions(expressionsAndOptions)
-  ).toSegment();
+  );
 
 /**
  * Creates a new non-capturing group segment that matches
@@ -151,7 +143,7 @@ export const zeroOrMore = (...expressionsAndOptions) =>
  * @returns {Segment} The new group segment.
  */
 export const repeat = (...expressionsAndOptions) =>
-  new Quantifier(
+  createQuantifier(
     'repeat',
     ...extractOptionsAndExpressions(expressionsAndOptions, true)
-  ).toSegment();
+  );

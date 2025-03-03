@@ -23,20 +23,14 @@ const extractOptionsAndExpressions = createOptionsExtractor(
   isValidOptionsWithNameCheck
 );
 
-class Group {
-  constructor(expressions, options = {}) {
-    this.expression = joinSegments(toSegments(...expressions));
-    this.options = { ...DEFAULT_OPTIONS, ...options };
-  }
+const createGroup = (expressions, options = {}) => {
+  const expression = joinSegments(toSegments(...expressions));
+  const { capture, name } = { ...DEFAULT_OPTIONS, ...options };
 
-  toSegment() {
-    const { capture, name } = this.options;
-
-    if (name) return new Segment(`(?<${name}>${this.expression})`);
-    if (capture) return new Segment(`(${this.expression})`);
-    return new Segment(`(?:${this.expression})`);
-  }
-}
+  if (name) return new Segment(`(?<${name}>${expression})`);
+  if (capture) return new Segment(`(${expression})`);
+  return new Segment(`(?:${expression})`);
+};
 
 /**
  * Creates a new capturing/non-capturing/named group segment with the provided expressions.
@@ -49,7 +43,7 @@ class Group {
  * @returns {Segment} The new group segment.
  */
 export const group = (...expressionsAndOptions) =>
-  new Group(...extractOptionsAndExpressions(expressionsAndOptions)).toSegment();
+  createGroup(...extractOptionsAndExpressions(expressionsAndOptions));
 
 /**
  * Combines multiple expressions into a single non-capturing group segment.

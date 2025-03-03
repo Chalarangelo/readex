@@ -5,21 +5,16 @@ import { createOptionsValidator, createOptionsExtractor } from './utils.js';
 const isValidOptions = createOptionsValidator(['positive', 'negative'], true);
 const extractOptionsAndExpressions = createOptionsExtractor(isValidOptions);
 
-class LookAround {
-  constructor(type, expressions, options = {}) {
-    this.expression = concat(...toSegments(...expressions));
-    this.prefix = `?${type === 'lookbehind' ? '<' : ''}`;
-    this.prefix +=
-      Object.keys(options).length &&
-      (options.negative === true || options.positive === false)
-        ? '!'
-        : '=';
-  }
+const createLookAround = (type, expressions, options = {}) => {
+  const expression = concat(...toSegments(...expressions));
+  let prefix = `?${type === 'lookbehind' ? '<' : ''}`;
+  prefix +=
+    Object.keys(options).length && (options.negative || !options.positive)
+      ? '!'
+      : '=';
 
-  toSegment() {
-    return new Segment(`(${this.prefix}${this.expression})`);
-  }
-}
+  return new Segment(`(${prefix}${expression})`);
+};
 
 /**
  * Creates a new lookahead group segment with the provided expressions.
@@ -32,10 +27,10 @@ class LookAround {
  * @returns {Segment} The new lookahead group segment.
  */
 export const lookahead = (...expressionsAndOptions) =>
-  new LookAround(
+  createLookAround(
     'lookahead',
     ...extractOptionsAndExpressions(expressionsAndOptions)
-  ).toSegment();
+  );
 
 /**
  * Creates a new lookbehind group segment with the provided expressions.
@@ -48,7 +43,7 @@ export const lookahead = (...expressionsAndOptions) =>
  * @returns {Segment} The new lookbehind group segment.
  */
 export const lookbehind = (...expressionsAndOptions) =>
-  new LookAround(
+  createLookAround(
     'lookbehind',
     ...extractOptionsAndExpressions(expressionsAndOptions)
-  ).toSegment();
+  );
