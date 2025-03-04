@@ -1,4 +1,4 @@
-import { toSegments, joinSegments } from './segment.js';
+import { toSegments, joinSegments } from './utils.js';
 
 const toGroup = (expressions, options) => {
   const expression = joinSegments(toSegments(...expressions)).source;

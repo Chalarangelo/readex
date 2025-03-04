@@ -1,4 +1,4 @@
-import { toSegments } from './segment.js';
+import { toSegments } from './utils.js';
 import { concat } from './group.js';
 
 const toLookAround = (expressions, options) => {

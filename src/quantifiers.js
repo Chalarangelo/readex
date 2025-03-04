@@ -1,4 +1,4 @@
-import { toSegments } from './segment.js';
+import { toSegments } from './utils.js';
 import { nonCaptureGroup } from './group.js';
 
 const toQuantifier = (expressions, options) => {

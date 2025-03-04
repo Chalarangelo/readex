@@ -1,4 +1,4 @@
-import { toSegment, toSegments, joinSegments } from './segment.js';
+import { toSegment, toSegments, joinSegments } from './utils.js';
 
 /**
  * Converts an expression to a character set.

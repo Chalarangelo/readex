@@ -1,4 +1,15 @@
-import { sanitize } from './sanitize.js';
+/**
+ * Sanitizes a given value by escaping special characters used in regular expressions.
+ *
+ * @param {(string|number)} val - The value to sanitize. Must be a string or a number.
+ * @returns {string} The sanitized string with special characters escaped.
+ * @throws {TypeError} If the provided value is not a string or a number.
+ */
+export const sanitize = val => {
+  if (typeof val !== 'string' && typeof val !== 'number')
+    throw new TypeError('Value must be a string or a number');
+  return `${val}`.replace(/[|\\{}()[\]^$+*?.-]/g, '\\$&');
+};
 
 /**
  * Converts the given expression to a RegExp segment.

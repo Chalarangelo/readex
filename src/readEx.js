@@ -1,4 +1,4 @@
-import { joinSegments, toSegments } from './segment.js';
+import { joinSegments, toSegments } from './utils.js';
 import { asFlags } from './flags.js';
 
 /**
