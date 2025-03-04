@@ -2,7 +2,7 @@ import { Segment, toSegments } from './segment.js';
 import { nonCaptureGroup } from './group.js';
 
 const toQuantifier = (expressions, options) => {
-  const expression = nonCaptureGroup(...toSegments(...expressions));
+  const expression = nonCaptureGroup(...toSegments(...expressions)).source;
   const { suffix, lazy } = options;
   return new Segment(`${expression}${suffix}${lazy ? '?' : ''}`);
 };

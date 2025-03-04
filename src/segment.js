@@ -2,17 +2,10 @@ import { sanitize } from './sanitize.js';
 
 export class Segment extends RegExp {
   constructor(expression) {
-    const source =
-      expression instanceof RegExp
-        ? expression.source
-        : typeof expression === 'string'
-        ? expression
-        : null;
-    super(source);
-  }
+    if (typeof expression !== 'string' && !(expression instanceof RegExp))
+      throw new TypeError('Invalid segment expression.');
 
-  toString() {
-    return this.source;
+    super(expression instanceof RegExp ? expression.source : expression);
   }
 }
 
@@ -43,4 +36,4 @@ export const toSegments = (...expressions) => expressions.map(toSegment);
  * @returns {Segment} A new Segment object containing the joined segments.
  */
 export const joinSegments = (segments, separator = '') =>
-  new Segment(segments.join(separator));
+  new Segment(segments.map(s => s.source).join(separator));

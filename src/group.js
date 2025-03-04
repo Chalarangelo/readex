@@ -1,7 +1,7 @@
 import { Segment, toSegments, joinSegments } from './segment.js';
 
 const toGroup = (expressions, options) => {
-  const expression = joinSegments(toSegments(...expressions));
+  const expression = joinSegments(toSegments(...expressions)).source;
   const { capture, name } = options;
 
   if (name) return new Segment(`(?<${name}>${expression})`);

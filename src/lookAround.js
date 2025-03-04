@@ -2,7 +2,7 @@ import { Segment, toSegments } from './segment.js';
 import { concat } from './group.js';
 
 const toLookAround = (expressions, options) => {
-  const expression = concat(...toSegments(...expressions));
+  const expression = concat(...toSegments(...expressions)).source;
   const prefix = `?${options.lookbehind ? '<' : ''}${
     options.negative ? '!' : '='
   }`;

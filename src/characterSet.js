@@ -19,7 +19,7 @@ export const toCharacterSet = expression => {
 
 const toAnything = (prefix, ...expressions) =>
   new Segment(
-    `[${prefix}${joinSegments(expressions.map(toCharacterSet), '|')}]`
+    `[${prefix}${joinSegments(expressions.map(toCharacterSet), '|').source}]`
   );
 
 /**
