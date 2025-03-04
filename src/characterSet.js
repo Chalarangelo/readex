@@ -1,10 +1,10 @@
-import { Segment, toSegment, toSegments, joinSegments } from './segment.js';
+import { toSegment, toSegments, joinSegments } from './segment.js';
 
 /**
  * Converts an expression to a character set.
  *
  * @param {string | Array} expression - The expression to convert. Must be either a string or a 2-element array.
- * @returns {Segment} A new Segment object representing the character set.
+ * @returns {RegExp} A new segment representing the character set.
  * @throws {TypeError} If the expression is not a string or a 2-element array.
  */
 export const toCharacterSet = expression => {
@@ -18,16 +18,16 @@ export const toCharacterSet = expression => {
 };
 
 const toAnything = (prefix, ...expressions) =>
-  new Segment(
+  new RegExp(
     `[${prefix}${joinSegments(expressions.map(toCharacterSet), '|').source}]`
   );
 
 /**
- * Creates a new Segment that matches any character from the provided expressions.
+ * Creates a new segment that matches any character from the provided expressions.
  *
  * @param {...(string | Array)} expressions - The expressions to include in the character set.
  *    Each expression must be either a string or a 2-element array.
- * @returns {Segment} A new Segment that matches any character from the provided expressions.
+ * @returns {RegExp} A new segment that matches any character from the provided expressions.
  */
 export const anythingFrom = (...expressions) => toAnything('', ...expressions);
 
@@ -36,6 +36,6 @@ export const anythingFrom = (...expressions) => toAnything('', ...expressions);
  *
  * @param {...string} expressions - The expressions to exclude from the character set.
  *    Each expression must be either a string or a 2-element array.
- * @returns {Segment} A Segment that matches any character not in the provided expressions.
+ * @returns {RegExp} A segment that matches any character not in the provided expressions.
  */
 export const anythingBut = (...expressions) => toAnything('^', ...expressions);

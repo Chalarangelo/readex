@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { toSegment, toSegments, joinSegments } from '#src/segment.js';
 
 describe('toSegment', () => {
-  describe('when value is a Segment instance', () => {
-    it('copies the Segment value', () => {
+  describe('when value is a RegExp segment', () => {
+    it('copies the segment value', () => {
       const segment = toSegment('some value');
       expect(toSegment(segment).source).toEqual('some value');
     });
@@ -50,7 +50,7 @@ describe('toSegments', () => {
     ['a string and a RegExp with flags', ['a', /b/gim], ['a', 'b']],
     ['multiple RegExps', [/a/, /b/], ['a', 'b']],
   ])('when called with %s', (_, expressions, expected) => {
-    it('returns an array of Segment instances', () => {
+    it('returns an array of RegExp segments', () => {
       expect(toSegments(...expressions).map(seg => seg.source)).toEqual(
         expected
       );

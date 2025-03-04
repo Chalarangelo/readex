@@ -1,10 +1,10 @@
-import { Segment, toSegments } from './segment.js';
+import { toSegments } from './segment.js';
 import { nonCaptureGroup } from './group.js';
 
 const toQuantifier = (expressions, options) => {
   const expression = nonCaptureGroup(...toSegments(...expressions)).source;
   const { suffix, lazy } = options;
-  return new Segment(`${expression}${suffix}${lazy ? '?' : ''}`);
+  return new RegExp(`${expression}${suffix}${lazy ? '?' : ''}`);
 };
 
 const toRepeat = (expressions, options) => {
@@ -36,8 +36,8 @@ const toRepeat = (expressions, options) => {
 /**
  * Creates a new non-capturing group segment that greedily matches the expressions zero or one time.
  *
- * @param {...(Segment|RegExp|string)} expressions - The expressions to group.
- * @returns {Segment} The new group segment.
+ * @param {...(RegExp|string)} expressions - The expressions to group.
+ * @returns {RegExp} The new group segment.
  */
 export const zeroOrOne = (...expressions) =>
   toQuantifier(expressions, { suffix: '?' });
@@ -45,8 +45,8 @@ export const zeroOrOne = (...expressions) =>
 /**
  * Creates a new non-capturing group segment that lazily matches the expressions zero or one time.
  *
- * @param {...(Segment|RegExp|string)} expressions - The expressions to group.
- * @returns {Segment} The new group segment.
+ * @param {...(RegExp|string)} expressions - The expressions to group.
+ * @returns {RegExp} The new group segment.
  */
 export const zeroOrOneLazy = (...expressions) =>
   toQuantifier(expressions, { suffix: '?', lazy: true });
@@ -54,8 +54,8 @@ export const zeroOrOneLazy = (...expressions) =>
 /**
  * Creates a new non-capturing group segment that greedily matches the expressions one or more times.
  *
- * @param {...(Segment|RegExp|string)} expressions - The expressions to group.
- * @returns {Segment} The new group segment.
+ * @param {...(RegExp|string)} expressions - The expressions to group.
+ * @returns {RegExp} The new group segment.
  */
 export const oneOrMore = (...expressions) =>
   toQuantifier(expressions, { suffix: '+' });
@@ -63,8 +63,8 @@ export const oneOrMore = (...expressions) =>
 /**
  * Creates a new non-capturing group segment that lazily matches the expressions one or more times.
  *
- * @param {...(Segment|RegExp|string)} expressions - The expressions to group.
- * @returns {Segment} The new group segment.
+ * @param {...(RegExp|string)} expressions - The expressions to group.
+ * @returns {RegExp} The new group segment.
  */
 export const oneOrMoreLazy = (...expressions) =>
   toQuantifier(expressions, { suffix: '+', lazy: true });
@@ -72,8 +72,8 @@ export const oneOrMoreLazy = (...expressions) =>
 /**
  * Creates a new non-capturing group segment that greedily matches the expressions zero or more times.
  *
- * @param {...(Segment|RegExp|string)} expressions - The expressions to group.
- * @returns {Segment} The new group segment.
+ * @param {...(RegExp|string)} expressions - The expressions to group.
+ * @returns {RegExp} The new group segment.
  */
 export const zeroOrMore = (...expressions) =>
   toQuantifier(expressions, { suffix: '*' });
@@ -81,8 +81,8 @@ export const zeroOrMore = (...expressions) =>
 /**
  * Creates a new non-capturing group segment that lazily matches the expressions zero or more times.
  *
- * @param {...(Segment|RegExp|string)} expressions - The expressions to group.
- * @returns {Segment} The new group segment.
+ * @param {...(RegExp|string)} expressions - The expressions to group.
+ * @returns {RegExp} The new group segment.
  */
 export const zeroOrMoreLazy = (...expressions) =>
   toQuantifier(expressions, { suffix: '*', lazy: true });
@@ -95,8 +95,8 @@ export const zeroOrMoreLazy = (...expressions) =>
  *   If an array is provided, the first element is the minimum number of times to match,
  *   and the second element is the maximum number of times to match. `null`/`undefined` can be used
  *   to indicate no limit. (e.g. [2,] matches 2 or more times, [,4] matches 4 or fewer times)
- * @param {...(Segment|RegExp|string)} expressions - The expressions to group.
- * @returns {Segment} The new group segment.
+ * @param {...(RegExp|string)} expressions - The expressions to group.
+ * @returns {RegExp} The new group segment.
  */
 export const repeat = (options, ...expressions) =>
   toRepeat(expressions, options);
@@ -109,8 +109,8 @@ export const repeat = (options, ...expressions) =>
  *   If an array is provided, the first element is the minimum number of times to match,
  *   and the second element is the maximum number of times to match. `null`/`undefined` can be used
  *   to indicate no limit. (e.g. [2,] matches 2 or more times, [,4] matches 4 or fewer times)
- * @param {...(Segment|RegExp|string)} expressions - The expressions to group.
- * @returns {Segment} The new group segment.
+ * @param {...(RegExp|string)} expressions - The expressions to group.
+ * @returns {RegExp} The new group segment.
  */
 export const repeatLazy = (options, ...expressions) =>
   toRepeat(expressions, { ...options, lazy: true });
