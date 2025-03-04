@@ -57,7 +57,7 @@ const extractOptionsAndExpressions = (
     ? extractOptionsAndExpressionsWithMinMax(expressionsAndOptions)
     : extractOptionsAndExpressionsWithoutMinMax(expressionsAndOptions);
 
-const createQuantifier = (type, expressions, options = {}) => {
+const toQuantifier = (type, expressions, options = {}) => {
   const expression = group(...toSegments(...expressions), { capture: false });
   let suffix = {
     maybe: '?',
@@ -89,10 +89,7 @@ const createQuantifier = (type, expressions, options = {}) => {
  * @returns {Segment} The new group segment.
  */
 export const maybe = (...expressionsAndOptions) =>
-  createQuantifier(
-    'maybe',
-    ...extractOptionsAndExpressions(expressionsAndOptions)
-  );
+  toQuantifier('maybe', ...extractOptionsAndExpressions(expressionsAndOptions));
 
 /**
  * Creates a new non-capturing group segment that matches
@@ -106,7 +103,7 @@ export const maybe = (...expressionsAndOptions) =>
  * @returns {Segment} The new group segment.
  */
 export const oneOrMore = (...expressionsAndOptions) =>
-  createQuantifier(
+  toQuantifier(
     'oneOrMore',
     ...extractOptionsAndExpressions(expressionsAndOptions)
   );
@@ -123,7 +120,7 @@ export const oneOrMore = (...expressionsAndOptions) =>
  * @returns {Segment} The new group segment.
  */
 export const zeroOrMore = (...expressionsAndOptions) =>
-  createQuantifier(
+  toQuantifier(
     'zeroOrMore',
     ...extractOptionsAndExpressions(expressionsAndOptions)
   );
@@ -143,7 +140,7 @@ export const zeroOrMore = (...expressionsAndOptions) =>
  * @returns {Segment} The new group segment.
  */
 export const repeat = (...expressionsAndOptions) =>
-  createQuantifier(
+  toQuantifier(
     'repeat',
     ...extractOptionsAndExpressions(expressionsAndOptions, true)
   );

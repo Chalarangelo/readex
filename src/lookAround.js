@@ -5,7 +5,7 @@ import { createOptionsValidator, createOptionsExtractor } from './utils.js';
 const isValidOptions = createOptionsValidator(['positive', 'negative'], true);
 const extractOptionsAndExpressions = createOptionsExtractor(isValidOptions);
 
-const createLookAround = (type, expressions, options = {}) => {
+const toLookAround = (type, expressions, options = {}) => {
   const expression = concat(...toSegments(...expressions));
   let prefix = `?${type === 'lookbehind' ? '<' : ''}`;
   prefix +=
@@ -27,7 +27,7 @@ const createLookAround = (type, expressions, options = {}) => {
  * @returns {Segment} The new lookahead group segment.
  */
 export const lookahead = (...expressionsAndOptions) =>
-  createLookAround(
+  toLookAround(
     'lookahead',
     ...extractOptionsAndExpressions(expressionsAndOptions)
   );
@@ -43,7 +43,7 @@ export const lookahead = (...expressionsAndOptions) =>
  * @returns {Segment} The new lookbehind group segment.
  */
 export const lookbehind = (...expressionsAndOptions) =>
-  createLookAround(
+  toLookAround(
     'lookbehind',
     ...extractOptionsAndExpressions(expressionsAndOptions)
   );

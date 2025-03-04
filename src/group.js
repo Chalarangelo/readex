@@ -23,7 +23,7 @@ const extractOptionsAndExpressions = createOptionsExtractor(
   isValidOptionsWithNameCheck
 );
 
-const createGroup = (expressions, options = {}) => {
+const toGroup = (expressions, options = {}) => {
   const expression = joinSegments(toSegments(...expressions));
   const { capture, name } = { ...DEFAULT_OPTIONS, ...options };
 
@@ -43,7 +43,7 @@ const createGroup = (expressions, options = {}) => {
  * @returns {Segment} The new group segment.
  */
 export const group = (...expressionsAndOptions) =>
-  createGroup(...extractOptionsAndExpressions(expressionsAndOptions));
+  toGroup(...extractOptionsAndExpressions(expressionsAndOptions));
 
 /**
  * Combines multiple expressions into a single non-capturing group segment.

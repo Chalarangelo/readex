@@ -17,6 +17,11 @@ export const toCharacterSet = expression => {
   );
 };
 
+const toAnything = (prefix, ...expressions) =>
+  new Segment(
+    `[${prefix}${joinSegments(expressions.map(toCharacterSet), '|')}]`
+  );
+
 /**
  * Creates a new Segment that matches any character from the provided expressions.
  *
@@ -24,8 +29,7 @@ export const toCharacterSet = expression => {
  *    Each expression must be either a string or a 2-element array.
  * @returns {Segment} A new Segment that matches any character from the provided expressions.
  */
-export const anythingFrom = (...expressions) =>
-  new Segment(`[${joinSegments(expressions.map(toCharacterSet), '|')}]`);
+export const anythingFrom = (...expressions) => toAnything('', ...expressions);
 
 /**
  * Creates a character set that matches any character not in the provided expressions.
@@ -34,5 +38,4 @@ export const anythingFrom = (...expressions) =>
  *    Each expression must be either a string or a 2-element array.
  * @returns {Segment} A Segment that matches any character not in the provided expressions.
  */
-export const anythingBut = (...expressions) =>
-  new Segment(`[^${joinSegments(expressions.map(toCharacterSet), '|')}]`);
+export const anythingBut = (...expressions) => toAnything('^', ...expressions);
