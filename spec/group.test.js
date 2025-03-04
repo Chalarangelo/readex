@@ -2,26 +2,39 @@ import { describe, it, expect } from 'vitest';
 import './matchers.js';
 
 import readEx from '#src/readEx.js';
-import { group, concat } from '#src/group.js';
+import {
+  captureGroup,
+  nonCaptureGroup,
+  namedGroup,
+  concat,
+} from '#src/group.js';
 
-describe('group', () => {
-  describe.each([
-    ['with default options', {}],
-    ['with capture: true', { capture: true }],
-  ])('%s', (_, options) => {
+describe('captureGroup', () => {
+  describe('with a simple expression', () => {
     it('should create a capturing group', () => {
-      const regexp = readEx([/^/, 'a', group('bc', options), /$/]);
+      const regexp = readEx([/^/, 'a', captureGroup('bc'), /$/]);
       const [fullMatch, match] = regexp.exec('abc');
       expect(fullMatch).toBe('abc');
       expect(match).toBe('bc');
     });
+  });
 
-    it('should work with multiple groups', () => {
+  describe('with an array of expressions', () => {
+    it('should create a capturing group with multiple expressions', () => {
+      const regexp = readEx([/^/, captureGroup('a', /b/, 'c'), /$/]);
+      const [fullMatch, match] = regexp.exec('abc');
+      expect(fullMatch).toBe('abc');
+      expect(match).toBe('abc');
+    });
+  });
+
+  describe('with multiple groups', () => {
+    it('should create multiple capturing groups', () => {
       const regexp = readEx([
         /^/,
-        group('a', options),
-        group('b', options),
-        group('c', options),
+        captureGroup('a'),
+        captureGroup('b'),
+        captureGroup('c'),
         /$/,
       ]);
       const [, a, b, c] = regexp.exec('abc');
@@ -30,64 +43,81 @@ describe('group', () => {
       expect(c).toBe('c');
     });
   });
+});
 
-  describe('with capture: false', () => {
+describe('nonCaptureGroup', () => {
+  describe('with a simple expression', () => {
     it('should create a non-capturing group', () => {
-      const regexp = readEx([/^/, 'a', group(/bc/, { capture: false }), /$/]);
+      const regexp = readEx([/^/, 'a', nonCaptureGroup(/bc/), /$/]);
       const [fullMatch, match] = regexp.exec('abc');
       expect(fullMatch).toBe('abc');
       expect(match).not.toBe('bc');
     });
   });
 
-  describe('when given a name', () => {
+  describe('with an array of expressions', () => {
+    it('should create a non-capturing group with multiple expressions', () => {
+      const regexp = readEx([/^/, nonCaptureGroup('a', /b/, 'c'), /$/]);
+      const [fullMatch, match] = regexp.exec('abc');
+      expect(fullMatch).toBe('abc');
+      expect(match).not.toBe('abc');
+    });
+  });
+
+  describe('with multiple groups', () => {
+    it('should create multiple non-capturing groups', () => {
+      const regexp = readEx([
+        /^/,
+        nonCaptureGroup('a'),
+        nonCaptureGroup('b'),
+        nonCaptureGroup('c'),
+        /$/,
+      ]);
+      const [, a, b, c] = regexp.exec('abc');
+      expect(a).not.toBe('a');
+      expect(b).not.toBe('b');
+      expect(c).not.toBe('c');
+    });
+  });
+});
+
+describe('namedGroup', () => {
+  describe('with a simple expression', () => {
     it('should create a named capturing group', () => {
-      const regexp = readEx([/^/, 'a', group('bc', { name: 'myName' }), /$/]);
+      const regexp = readEx([
+        /^/,
+        'a',
+        namedGroup({ name: 'myName' }, 'bc'),
+        /$/,
+      ]);
       const matches = regexp.exec('abc');
       expect(matches[0]).toBe('abc');
       expect(matches.groups.myName).toBe('bc');
     });
+  });
 
-    describe('when given an invalid name', () => {
-      it('should throw an error', () => {
-        expect(() => group('bc', { name: 123 })).toThrow();
-      });
-    });
-
-    describe('when given capture: false', () => {
-      it('should throw an error', () => {
-        expect(() => group('bc', { name: 'myName', capture: false })).toThrow();
-      });
+  describe('when not given a name', () => {
+    it('should throw an error', () => {
+      expect(() => namedGroup('bc')).toThrow();
+      expect(() => namedGroup('a', 'bc')).toThrow();
     });
   });
 
-  describe('with a single expression and no options argument', () => {
-    it('should create a capturing group', () => {
-      const regexp = readEx([/^/, 'a', group('bc'), /$/]);
-      const [fullMatch, match] = regexp.exec('abc');
-      expect(fullMatch).toBe('abc');
-      expect(match).toBe('bc');
+  describe('when given an invalid name', () => {
+    it('should throw an error', () => {
+      expect(() => namedGroup({ name: 123 }, 'bc')).toThrow();
     });
   });
 
-  describe('with an array of expressions', () => {
-    it('should create a group with multiple expressions', () => {
-      const regexp = readEx([/^/, group('a', /b/, 'c'), /$/]);
-      const [fullMatch, match] = regexp.exec('abc');
-      expect(fullMatch).toBe('abc');
-      expect(match).toBe('abc');
-    });
-  });
-
-  describe('with nested groups of different types', () => {
+  describe('when nested groups of different types', () => {
     it('should respect group options', () => {
       const regexp = readEx([
         /^/,
-        group(
+        captureGroup(
           'a',
-          group('b', { capture: false }),
+          nonCaptureGroup('b'),
           'c',
-          group('d', { name: 'myName' })
+          namedGroup({ name: 'myName' }, 'd')
         ),
         /$/,
       ]);

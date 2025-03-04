@@ -1,146 +1,116 @@
 import { Segment, toSegments } from './segment.js';
-import { group } from './group.js';
-import {
-  createOptionsValidator,
-  createOptionsExtractor,
-  isNil,
-  isPositiveInteger,
-  isNonNegativeInteger,
-} from './utils.js';
+import { nonCaptureGroup } from './group.js';
 
-const isValidQuantity = val => isNil(val) || isNonNegativeInteger(val);
-const isValidTimes = isPositiveInteger;
-
-const isValidOptions = createOptionsValidator(['greedy', 'lazy'], true);
-
-const isValidOptionsWithMinMax = val => {
-  const { min, max, times, ...options } = val;
-
-  if (!isValidOptions(options)) return false;
-
-  if (times !== undefined) {
-    if (!isValidTimes(times))
-      throw new Error('Invalid quantifier: times must be a positive integer.');
-
-    if (min !== undefined || max !== undefined)
-      throw new Error(
-        'Invalid quantifier: times cannot be used with min or max.'
-      );
-
-    return true;
-  }
-
-  if (!isValidQuantity(min) || !isValidQuantity(max))
-    throw new Error(
-      'Invalid quantifier: min and max must be non-negative integers.'
-    );
-
-  if (!isNil(min) && !isNil(max) && min > max)
-    throw new Error(
-      'Invalid quantifier: min must be less than or equal to max.'
-    );
-
-  return true;
+const toQuantifier = (expressions, options) => {
+  const expression = nonCaptureGroup(...toSegments(...expressions));
+  const { suffix, lazy } = options;
+  return new Segment(`${expression}${suffix}${lazy ? '?' : ''}`);
 };
 
-const extractOptionsAndExpressionsWithoutMinMax =
-  createOptionsExtractor(isValidOptions);
-const extractOptionsAndExpressionsWithMinMax = createOptionsExtractor(
-  isValidOptionsWithMinMax
-);
+const toRepeat = (expressions, options) => {
+  const { times, lazy } = options;
 
-const extractOptionsAndExpressions = (
-  expressionsAndOptions,
-  includeMinMax = false
-) =>
-  includeMinMax
-    ? extractOptionsAndExpressionsWithMinMax(expressionsAndOptions)
-    : extractOptionsAndExpressionsWithoutMinMax(expressionsAndOptions);
+  const [min = null, max = null] = Array.isArray(times)
+    ? times
+    : [times, times];
 
-const toQuantifier = (type, expressions, options = {}) => {
-  const expression = group(...toSegments(...expressions), { capture: false });
-  let suffix = {
-    maybe: '?',
-    oneOrMore: '+',
-    zeroOrMore: '*',
-  }[type];
+  let hasError = min === null && max === null;
+  if (min !== null && (!Number.isInteger(min) || min < 0)) hasError = true;
+  if (
+    max !== null &&
+    (!Number.isInteger(max) || max < 0 || (min !== null && min > max))
+  )
+    hasError = true;
 
-  if (type === 'repeat') {
-    const min = options.min ?? options.times ?? 0;
-    const max = options.max ?? options.times ?? '';
-    suffix = min === max ? `{${min}}` : `{${min},${max}}`;
-  }
+  if (hasError)
+    throw new TypeError(
+      'Invalid times option: times must be either a number or an array of two numbers.'
+    );
 
-  if (Object.keys(options).length && (options.lazy || !options.greedy))
-    suffix += '?';
+  const [start, end] = [min ?? 0, max ?? ''];
+  const suffix = start === end ? `{${start}}` : `{${start},${end}}`;
 
-  return new Segment(`${expression}${suffix}`);
+  return toQuantifier(expressions, { suffix, lazy });
 };
 
 /**
- * Creates a new non-capturing group segment that optionally matches
- * the provided expressions.
+ * Creates a new non-capturing group segment that greedily matches the expressions zero or one time.
  *
- * @param {...any} expressionsAndOptions - The expressions and options to group.
- *    The last argument can be an options object with one of the following properties:
- *     - greedy: boolean - Whether the group should be greedy (default).
- *     - lazy: boolean - Whether the group should be lazy.
- * @throws {Error} If no expressions are provided.
+ * @param {...(Segment|RegExp|string)} expressions - The expressions to group.
  * @returns {Segment} The new group segment.
  */
-export const maybe = (...expressionsAndOptions) =>
-  toQuantifier('maybe', ...extractOptionsAndExpressions(expressionsAndOptions));
+export const zeroOrOne = (...expressions) =>
+  toQuantifier(expressions, { suffix: '?' });
 
 /**
- * Creates a new non-capturing group segment that matches
- * one or more of the provided expressions.
+ * Creates a new non-capturing group segment that lazily matches the expressions zero or one time.
  *
- * @param {...any} expressionsAndOptions - The expressions and options to group.
- *   The last argument can be an options object with one of the following properties:
- *    - greedy: boolean - Whether the group should be greedy (default).
- *    - lazy: boolean - Whether the group should be lazy.
- * @throws {Error} If no expressions are provided.
+ * @param {...(Segment|RegExp|string)} expressions - The expressions to group.
  * @returns {Segment} The new group segment.
  */
-export const oneOrMore = (...expressionsAndOptions) =>
-  toQuantifier(
-    'oneOrMore',
-    ...extractOptionsAndExpressions(expressionsAndOptions)
-  );
+export const zeroOrOneLazy = (...expressions) =>
+  toQuantifier(expressions, { suffix: '?', lazy: true });
 
 /**
- * Creates a new non-capturing group segment that matches
- * zero or more of the provided expressions.
+ * Creates a new non-capturing group segment that greedily matches the expressions one or more times.
  *
- * @param {...any} expressionsAndOptions - The expressions and options to group.
- *   The last argument can be an options object with one of the following properties:
- *    - greedy: boolean - Whether the group should be greedy (default).
- *    - lazy: boolean - Whether the group should be lazy.
- * @throws {Error} If no expressions are provided.
+ * @param {...(Segment|RegExp|string)} expressions - The expressions to group.
  * @returns {Segment} The new group segment.
  */
-export const zeroOrMore = (...expressionsAndOptions) =>
-  toQuantifier(
-    'zeroOrMore',
-    ...extractOptionsAndExpressions(expressionsAndOptions)
-  );
+export const oneOrMore = (...expressions) =>
+  toQuantifier(expressions, { suffix: '+' });
 
 /**
- * Creates a new non-capturing group segment that matches
- * the provided expressions a specific number of times.
+ * Creates a new non-capturing group segment that lazily matches the expressions one or more times.
  *
- * @param {...any} expressionsAndOptions - The expressions and options to group.
- *   The last argument can be an options object with the following properties:
- *    - greedy: boolean - Whether the group should be greedy (default, mutually exclusive with lazy).
- *    - lazy: boolean - Whether the group should be lazy (mutually exclusive with greedy).
- *    - min: number - The minimum number of times the group should match.
- *    - max: number - The maximum number of times the group should match.
- *    - times: number - A shorthand for setting both min and max to the same value.
- * @throws {Error} If no expressions are provided or if min or max are invalid.
+ * @param {...(Segment|RegExp|string)} expressions - The expressions to group.
  * @returns {Segment} The new group segment.
  */
-export const repeat = (...expressionsAndOptions) =>
-  toQuantifier(
-    'repeat',
-    ...extractOptionsAndExpressions(expressionsAndOptions, true)
-  );
+export const oneOrMoreLazy = (...expressions) =>
+  toQuantifier(expressions, { suffix: '+', lazy: true });
+
+/**
+ * Creates a new non-capturing group segment that greedily matches the expressions zero or more times.
+ *
+ * @param {...(Segment|RegExp|string)} expressions - The expressions to group.
+ * @returns {Segment} The new group segment.
+ */
+export const zeroOrMore = (...expressions) =>
+  toQuantifier(expressions, { suffix: '*' });
+
+/**
+ * Creates a new non-capturing group segment that lazily matches the expressions zero or more times.
+ *
+ * @param {...(Segment|RegExp|string)} expressions - The expressions to group.
+ * @returns {Segment} The new group segment.
+ */
+export const zeroOrMoreLazy = (...expressions) =>
+  toQuantifier(expressions, { suffix: '*', lazy: true });
+
+/**
+ * Creates a new non-capturing group segment that greedily matches the expressions a specific number of times.
+ *
+ * @param {(number|number[])} times - The number of times to match the expressions.
+ *   If a number is provided, the expressions will be matched exactly that number of times.
+ *   If an array is provided, the first element is the minimum number of times to match,
+ *   and the second element is the maximum number of times to match. `null`/`undefined` can be used
+ *   to indicate no limit. (e.g. [2,] matches 2 or more times, [,4] matches 4 or fewer times)
+ * @param {...(Segment|RegExp|string)} expressions - The expressions to group.
+ * @returns {Segment} The new group segment.
+ */
+export const repeat = (options, ...expressions) =>
+  toRepeat(expressions, options);
+
+/**
+ * Creates a new non-capturing group segment that lazily matches the expressions a specific number of times.
+ *
+ * @param {(number|number[])} times - The number of times to match the expressions.
+ *   If a number is provided, the expressions will be matched exactly that number of times.
+ *   If an array is provided, the first element is the minimum number of times to match,
+ *   and the second element is the maximum number of times to match. `null`/`undefined` can be used
+ *   to indicate no limit. (e.g. [2,] matches 2 or more times, [,4] matches 4 or fewer times)
+ * @param {...(Segment|RegExp|string)} expressions - The expressions to group.
+ * @returns {Segment} The new group segment.
+ */
+export const repeatLazy = (options, ...expressions) =>
+  toRepeat(expressions, { ...options, lazy: true });

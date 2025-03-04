@@ -1,49 +1,46 @@
 import { Segment, toSegments } from './segment.js';
 import { concat } from './group.js';
-import { createOptionsValidator, createOptionsExtractor } from './utils.js';
 
-const isValidOptions = createOptionsValidator(['positive', 'negative'], true);
-const extractOptionsAndExpressions = createOptionsExtractor(isValidOptions);
-
-const toLookAround = (type, expressions, options = {}) => {
+const toLookAround = (expressions, options) => {
   const expression = concat(...toSegments(...expressions));
-  let prefix = `?${type === 'lookbehind' ? '<' : ''}`;
-  prefix +=
-    Object.keys(options).length && (options.negative || !options.positive)
-      ? '!'
-      : '=';
-
+  const prefix = `?${options.lookbehind ? '<' : ''}${
+    options.negative ? '!' : '='
+  }`;
   return new Segment(`(${prefix}${expression})`);
 };
 
 /**
- * Creates a new lookahead group segment with the provided expressions.
+ * Creates a new loohahead group segment with the provided expressions.
  *
- * @param {...any} expressionsAndOptions - The expressions and options to group.
- *    The last argument can be an options object with the following properties:
- *     - positive: boolean - Whether the pattern should be positive (default).
- *     - negative: boolean - Whether the pattern should be negative.
- * @throws {Error} If no expressions are provided.
- * @returns {Segment} The new lookahead group segment.
+ * @param {...(Segment|RegExp|string)} expressions - The expressions to group.
+ * @returns {Segment} The new loohahead group segment.
  */
-export const lookahead = (...expressionsAndOptions) =>
-  toLookAround(
-    'lookahead',
-    ...extractOptionsAndExpressions(expressionsAndOptions)
-  );
+export const lookahead = (...expressions) =>
+  toLookAround(expressions, { lookbehind: false, negative: false });
+
+/**
+ * Creates a new negative loohahead group segment with the provided expressions.
+ *
+ * @param {...(Segment|RegExp|string)} expressions - The expressions to group.
+ * @returns {Segment} The new loohahead group segment.
+ */
+export const negativeLookahead = (...expressions) =>
+  toLookAround(expressions, { lookbehind: false, negative: true });
 
 /**
  * Creates a new lookbehind group segment with the provided expressions.
  *
- * @param {...any} expressionsAndOptions - The expressions and options to group.
- *    The last argument can be an options object with the following properties:
- *     - positive: boolean - Whether the pattern should be positive (default).
- *     - negative: boolean - Whether the pattern should be negative.
- * @throws {Error} If no expressions are provided.
+ * @param {...(Segment|RegExp|string)} expressions - The expressions to group.
  * @returns {Segment} The new lookbehind group segment.
  */
-export const lookbehind = (...expressionsAndOptions) =>
-  toLookAround(
-    'lookbehind',
-    ...extractOptionsAndExpressions(expressionsAndOptions)
-  );
+export const lookbehind = (...expressions) =>
+  toLookAround(expressions, { lookbehind: true, negative: false });
+
+/**
+ * Creates a new negative lookbehind group segment with the provided expressions.
+ *
+ * @param {...(Segment|RegExp|string)} expressions - The expressions to group.
+ * @returns {Segment} The new lookbehind group segment.
+ */
+export const negativeLookbehind = (...expressions) =>
+  toLookAround(expressions, { lookbehind: true, negative: true });
