@@ -7,7 +7,7 @@
   "module": "./dist/readex.js",
   "exports": {
     ".": {
-      "import": "./dist/readex.js",
+      "import": "./dist/readex.js"
     }
   },
   "imports": {
