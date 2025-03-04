@@ -7,6 +7,7 @@ import {
   nonCaptureGroup,
   namedGroup,
   concat,
+  or,
 } from '#src/group.js';
 
 describe('captureGroup', () => {
@@ -139,5 +140,24 @@ describe('concat', () => {
     expect(readEx([/^/, concat(...expressions), /$/])).toMatchString('abc');
     expect(readEx([/^/, concat(...expressions), /$/])).not.toMatchString('a');
     expect(readEx([/^/, concat(...expressions), /$/])).not.toMatchString('ab');
+  });
+});
+
+describe('or', () => {
+  it('should match either of the patterns', () => {
+    expect(readEx([/^/, or('a', 'b'), /$/])).toMatchString('a');
+    expect(readEx([/^/, or('a', 'b'), /$/])).toMatchString('b');
+  });
+
+  it('should not match other patterns', () => {
+    expect(readEx([/^/, or('a', 'b'), /$/])).not.toMatchString('c');
+  });
+
+  it('should match an individual option, not both', () => {
+    expect(readEx([/^/, or('a', 'b'), /$/])).not.toMatchString('ab');
+  });
+
+  it('should work with a single pattern', () => {
+    expect(readEx([/^/, or('a'), /$/])).toMatchString('a');
   });
 });

@@ -50,3 +50,12 @@ export const namedGroup = (options, ...expressions) => {
  * @returns {Segment} The combined expression as a non-capturing group segment.
  */
 export const concat = (...expressions) => nonCaptureGroup(...expressions);
+
+/**
+ * Combines multiple expressions into a single non-capturing group segment separated by the OR (`|`) operator.
+ *
+ * @param {...(Segment|RegExp|string)} expressions - The expressions to be combined.
+ * @returns {Segment} The combined expression as a non-capturing group segment.
+ */
+export const or = (...expressions) =>
+  nonCaptureGroup(joinSegments(toSegments(...expressions), '|'));
