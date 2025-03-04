@@ -3,7 +3,15 @@
   "type": "module",
   "version": "1.0.0",
   "description": "ReadEx (pronounced /rɛdɛks/) is a more readable RegExp syntax for JS.",
-  "main": "src/index.js",
+  "files": ["dist"],
+  "main": "./dist/readex.umd.cjs",
+  "module": "./dist/readex.js",
+  "exports": {
+    ".": {
+      "import": "./dist/readex.js",
+      "require": "./dist/readex.umd.cjs"
+    }
+  },
   "imports": {
     "#src/*": [
       "./src/*"
@@ -13,7 +21,8 @@
     ]
   },
   "scripts": {
-    "test": "vitest"
+    "test": "vitest",
+    "build": "vite build"
   },
   "repository": {
     "type": "git",
@@ -29,6 +38,7 @@
   },
   "homepage": "https://github.com/Chalarangelo/readex#readme",
   "devDependencies": {
+    "vite": "^6.2.0",
     "vitest": "^3.0.7"
   }
 }
