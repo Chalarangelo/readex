@@ -4,12 +4,10 @@
   "version": "1.0.0",
   "description": "ReadEx (pronounced /rɛdɛks/) is a more readable RegExp syntax for JS.",
   "files": ["dist"],
-  "main": "./dist/readex.umd.cjs",
   "module": "./dist/readex.js",
   "exports": {
     ".": {
       "import": "./dist/readex.js",
-      "require": "./dist/readex.umd.cjs"
     }
   },
   "imports": {
