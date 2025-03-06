@@ -1,15 +1,3 @@
-const sanitize = (val) => {
-  if (typeof val !== "string" && typeof val !== "number")
-    throw new TypeError("Value must be a string or a number");
-  return `${val}`.replace(/[|\\{}()[\]^$+*?.-]/g, "\\$&");
-};
-const toSegment = (expression) => {
-  if (expression instanceof RegExp) return new RegExp(expression.source);
-  return new RegExp(sanitize(expression));
-};
-const toSegments = (prefix = "", suffix = "", separator = "", mapFn = (x) => x) => (...expressions) => new RegExp(
-  `${prefix}${expressions.map((e) => toSegment(mapFn(e)).source).join(separator)}${suffix}`
-);
 const DEFAULT_FLAGS = {
   dotAll: false,
   global: true,
@@ -44,7 +32,17 @@ const asFlags = (flags) => {
     )
   ).reduce((acc, [flag, value]) => value ? acc + FLAG_MAP[flag] : acc, "");
 };
-const readEx = (expressions, flags = {}) => new RegExp(toSegments()(...expressions).source, asFlags(flags));
+const toSegmentSource = (expression) => {
+  if (expression instanceof RegExp) return expression.source;
+  if (typeof expression === "string" || typeof expression === "number")
+    return new RegExp(`${expression}`.replace(/[|\\{}()[\]^$+*?.-]/g, "\\$&")).source;
+  throw new TypeError("Value must be a string or a number");
+};
+const toSegments = (prefix = "", suffix = "", separator = "", mapFn = (x) => x, flags = {}) => (...expressions) => new RegExp(
+  `${prefix}${expressions.map((e) => toSegmentSource(mapFn(e))).join(separator)}${suffix}`,
+  asFlags(flags)
+);
+const readEx = (expressions, flags) => toSegments("", "", "", (x) => x, flags)(...expressions);
 const backReference = (reference) => {
   if (typeof reference === "number") return new RegExp(`\\${reference}`);
   if (typeof reference === "string") return new RegExp(`\\k<${reference}>`);
@@ -63,18 +61,14 @@ const lookahead = toSegments(`(?=(?:`, `))`);
 const negativeLookahead = toSegments(`(?!(?:`, `))`);
 const lookbehind = toSegments(`(?<=(?:`, `))`);
 const negativeLookbehind = toSegments(`(?<!(?:`, `))`);
+const isValidTimes = (val) => val === null || Number.isInteger(val) && val >= 0;
 const toRepeatSuffix = (times) => {
-  const [min = null, max = null] = Array.isArray(times) ? times : [times, times];
-  let hasError = min === null && max === null;
-  if (min !== null && (!Number.isInteger(min) || min < 0)) hasError = true;
-  if (max !== null && (!Number.isInteger(max) || max < 0 || min !== null && min > max))
-    hasError = true;
-  if (hasError)
+  const [min = 0, max = null] = Array.isArray(times) ? times : [times, times];
+  if (max !== null && min > max || !isValidTimes(min) || !isValidTimes(max))
     throw new TypeError(
       "Invalid times option: times must be either a number or an array of two numbers."
     );
-  const [start, end] = [min ?? 0, max ?? ""];
-  return start === end ? `{${start}}` : `{${start},${end}}`;
+  return min === max ? `{${min}}` : `{${min},${max ?? ""}}`;
 };
 const zeroOrOne = toSegments(`(?:`, `)?`);
 const zeroOrOneLazy = toSegments(`(?:`, `)??`);
@@ -102,9 +96,8 @@ const toCharacterSet = (expression) => {
     return toSegments("", "", "-")(...expression);
   return toSegments()(expression);
 };
-const toAnything = (prefix) => toSegments(`[${prefix}`, "]", "|", toCharacterSet);
-const anythingFrom = toAnything("");
-const anythingBut = toAnything("^");
+const anythingFrom = toSegments(`[`, "]", "|", toCharacterSet);
+const anythingBut = toSegments(`[^`, "]", "|", toCharacterSet);
 export {
   anyCharacter,
   anything,

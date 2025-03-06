@@ -1,25 +1,20 @@
-/**
- * Sanitizes a given value by escaping special characters used in regular expressions.
- *
- * @param {(string|number)} val - The value to sanitize. Must be a string or a number.
- * @returns {string} The sanitized string with special characters escaped.
- * @throws {TypeError} If the provided value is not a string or a number.
- */
-export const sanitize = val => {
-  if (typeof val !== 'string' && typeof val !== 'number')
-    throw new TypeError('Value must be a string or a number');
-  return `${val}`.replace(/[|\\{}()[\]^$+*?.-]/g, '\\$&');
-};
+import { asFlags } from './flags.js';
 
 /**
- * Converts the given expression to a RegExp segment.
+ * Converts the given expression to the source of a regular expression.
+ * If given a string or number, sanitizes the given value by escaping special
+ * characters used in regular expressions.
  *
- * @param {RegExp|string} expression - The expression to convert.
- * @returns {RegExp} - The resulting segment.
+ * @param {RegExp|string|number} expression - The expression to convert.
+ * @returns {string} The expression as a regular expression source.
+ * @throws {TypeError} If the provided value is not a RegExp, string or number.
  */
-export const toSegment = expression => {
-  if (expression instanceof RegExp) return new RegExp(expression.source);
-  return new RegExp(sanitize(expression));
+export const toSegmentSource = expression => {
+  if (expression instanceof RegExp) return expression.source;
+  if (typeof expression === 'string' || typeof expression === 'number')
+    return new RegExp(`${expression}`.replace(/[|\\{}()[\]^$+*?.-]/g, '\\$&'))
+      .source;
+  throw new TypeError('Value must be a string or a number');
 };
 
 /**
@@ -30,14 +25,16 @@ export const toSegment = expression => {
  * @param {string} [suffix=''] - The suffix to add to the end of the expression.
  * @param {string} [separator='']  - The separator to use between expressions.
  * @param {function} [mapFn=x=>x] - A function to apply to each expression before joining.
+ * @param {Object} [flags={}] - An object specifying the flags to apply to the resulting RegExp.
  * @returns {function} A function that takes an array of expressions and returns
  *    a new RegExp object.
  */
 export const toSegments =
-  (prefix = '', suffix = '', separator = '', mapFn = x => x) =>
+  (prefix = '', suffix = '', separator = '', mapFn = x => x, flags = {}) =>
   (...expressions) =>
     new RegExp(
       `${prefix}${expressions
-        .map(e => toSegment(mapFn(e)).source)
-        .join(separator)}${suffix}`
+        .map(e => toSegmentSource(mapFn(e)))
+        .join(separator)}${suffix}`,
+      asFlags(flags)
     );

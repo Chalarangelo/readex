@@ -1,5 +1,4 @@
 import { toSegments } from './utils.js';
-import { asFlags } from './flags.js';
 
 /**
  * Creates a new regular expression by joining multiple segments and applying specified flags.
@@ -8,7 +7,7 @@ import { asFlags } from './flags.js';
  * @param {Object} [flags={}] - An optional object specifying the flags to be applied to the regular expression.
  * @returns {RegExp} The resulting regular expression.
  */
-const readEx = (expressions, flags = {}) =>
-  new RegExp(toSegments()(...expressions).source, asFlags(flags));
+const readEx = (expressions, flags) =>
+  toSegments('', '', '', x => x, flags)(...expressions);
 
 export default readEx;

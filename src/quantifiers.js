@@ -1,25 +1,16 @@
 import { toSegments } from './utils.js';
 
+const isValidTimes = val => val === null || (Number.isInteger(val) && val >= 0);
+
 const toRepeatSuffix = times => {
-  const [min = null, max = null] = Array.isArray(times)
-    ? times
-    : [times, times];
+  const [min = 0, max = null] = Array.isArray(times) ? times : [times, times];
 
-  let hasError = min === null && max === null;
-  if (min !== null && (!Number.isInteger(min) || min < 0)) hasError = true;
-  if (
-    max !== null &&
-    (!Number.isInteger(max) || max < 0 || (min !== null && min > max))
-  )
-    hasError = true;
-
-  if (hasError)
+  if ((max !== null && min > max) || !isValidTimes(min) || !isValidTimes(max))
     throw new TypeError(
       'Invalid times option: times must be either a number or an array of two numbers.'
     );
 
-  const [start, end] = [min ?? 0, max ?? ''];
-  return start === end ? `{${start}}` : `{${start},${end}}`;
+  return min === max ? `{${min}}` : `{${min},${max ?? ''}}`;
 };
 
 /**
