@@ -13,8 +13,6 @@ export const toCharacterSet = expression => {
   return toSegments()(expression);
 };
 
-const toAnything = prefix => toSegments(`[${prefix}`, ']', '|', toCharacterSet);
-
 /**
  * Creates a new segment that matches any character from the provided expressions.
  *
@@ -22,7 +20,7 @@ const toAnything = prefix => toSegments(`[${prefix}`, ']', '|', toCharacterSet);
  *    Each expression must be either a string or a 2-element array.
  * @returns {RegExp} A new segment that matches any character from the provided expressions.
  */
-export const anythingFrom = toAnything('');
+export const anythingFrom = toSegments(`[`, ']', '|', toCharacterSet);
 
 /**
  * Creates a character set that matches any character not in the provided expressions.
@@ -31,4 +29,4 @@ export const anythingFrom = toAnything('');
  *    Each expression must be either a string or a 2-element array.
  * @returns {RegExp} A segment that matches any character not in the provided expressions.
  */
-export const anythingBut = toAnything('^');
+export const anythingBut = toSegments(`[^`, ']', '|', toCharacterSet);
