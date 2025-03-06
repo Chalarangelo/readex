@@ -8,12 +8,13 @@ import { toSegment, toSegments, joinSegments } from './utils.js';
  * @throws {TypeError} If the expression is not a string or a 2-element array.
  */
 export const toCharacterSet = expression => {
-  if (typeof expression === 'string') return toSegment(expression);
+  if (typeof expression === 'string' || typeof expression === 'number')
+    return toSegment(expression);
   if (Array.isArray(expression) && expression.length === 2)
     return joinSegments(toSegments(...expression), '-');
 
   throw new TypeError(
-    'Invalid character set expression. Must be a string or a 2-element array.'
+    'Invalid character set expression. Must be a string, number or a 2-element array.'
   );
 };
 

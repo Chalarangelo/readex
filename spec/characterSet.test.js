@@ -9,12 +9,13 @@ import {
 } from '#src/characterSet.js';
 
 describe('toCharacterSet', () => {
-  describe('when given a string', () => {
+  describe('when given a string or number', () => {
     it.each([
       ['abc', 'abc'],
       ['a-z', String.raw`a\-z`],
       ['[ab]', String.raw`\[ab\]`],
       ['[^a]', String.raw`\[\^a\]`],
+      [1, '1'],
     ])(
       'produces a segment that matches the characters exactly (%s) -> (%s)',
       (expression, expected) => {
@@ -36,7 +37,7 @@ describe('toCharacterSet', () => {
     );
   });
 
-  describe.each([['a,', 'b', 'c'], 1, null, undefined, () => {}, {}, /ab/gm])(
+  describe.each([['a,', 'b', 'c'], null, undefined, () => {}, {}, /ab/gm])(
     'when given anything else (%s) ',
     value => {
       it('should throw an error', () => {
