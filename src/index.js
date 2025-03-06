@@ -38,6 +38,7 @@ import {
   anything,
   something,
 } from './sequences.js';
+import { anythingFrom, anythingBut } from './characterSet.js';
 
 export {
   readEx,
@@ -72,4 +73,6 @@ export {
   anyCharacter,
   anything,
   something,
+  anythingFrom,
+  anythingBut,
 };
