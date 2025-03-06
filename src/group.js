@@ -1,14 +1,12 @@
 import { wrapSegments } from './utils.js';
 
-const toGroup = prefix => wrapSegments(`(${prefix}`, ')');
-
 /**
  * Creates a new capturing group segment with the provided expressions.
  *
  * @param {...(RegExp|string)} expressions - The expressions to group.
  * @returns {RegExp} The new group segment.
  */
-export const captureGroup = toGroup('');
+export const captureGroup = wrapSegments('(', ')');
 
 /**
  * Creates a new non-capturing group segment with the provided expressions.
@@ -16,7 +14,7 @@ export const captureGroup = toGroup('');
  * @param {...(RegExp|string)} expressions - The expressions to group.
  * @returns {RegExp} The new group segment.
  */
-export const nonCaptureGroup = toGroup('?:');
+export const nonCaptureGroup = wrapSegments('(?:', ')');
 
 /**
  * Creates a new named group segment with the provided expressions.
@@ -30,7 +28,7 @@ export const nonCaptureGroup = toGroup('?:');
 export const namedGroup = ({ name }, ...expressions) => {
   if (!name || typeof name !== 'string')
     throw new TypeError('Named groups must have a name.');
-  return toGroup(`?<${name}>`)(...expressions);
+  return wrapSegments(`(?<${name}>`, ')')(...expressions);
 };
 
 /**

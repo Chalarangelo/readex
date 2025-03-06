@@ -1,14 +1,12 @@
 import { wrapSegments } from './utils.js';
 
-const toLookAround = prefix => wrapSegments(`(?${prefix}(?:`, `))`);
-
 /**
  * Creates a new loohahead group segment with the provided expressions.
  *
  * @param {...(RegExp|string)} expressions - The expressions to group.
  * @returns {RegExp} The new loohahead group segment.
  */
-export const lookahead = toLookAround('=');
+export const lookahead = wrapSegments(`(?=(?:`, `))`);
 
 /**
  * Creates a new negative loohahead group segment with the provided expressions.
@@ -16,7 +14,7 @@ export const lookahead = toLookAround('=');
  * @param {...(RegExp|string)} expressions - The expressions to group.
  * @returns {RegExp} The new loohahead group segment.
  */
-export const negativeLookahead = toLookAround('!');
+export const negativeLookahead = wrapSegments(`(?!(?:`, `))`);
 
 /**
  * Creates a new lookbehind group segment with the provided expressions.
@@ -24,7 +22,7 @@ export const negativeLookahead = toLookAround('!');
  * @param {...(RegExp|string)} expressions - The expressions to group.
  * @returns {RegExp} The new lookbehind group segment.
  */
-export const lookbehind = toLookAround('<=');
+export const lookbehind = wrapSegments(`(?<=(?:`, `))`);
 
 /**
  * Creates a new negative lookbehind group segment with the provided expressions.
@@ -32,4 +30,4 @@ export const lookbehind = toLookAround('<=');
  * @param {...(RegExp|string)} expressions - The expressions to group.
  * @returns {RegExp} The new lookbehind group segment.
  */
-export const negativeLookbehind = toLookAround('<!');
+export const negativeLookbehind = wrapSegments(`(?<!(?:`, `))`);

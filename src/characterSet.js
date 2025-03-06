@@ -8,14 +8,9 @@ import { joinSegments, wrapSegments } from './utils.js';
  * @throws {TypeError} If the expression is not a string or a 2-element array.
  */
 export const toCharacterSet = expression => {
-  if (typeof expression === 'string' || typeof expression === 'number')
-    return joinSegments([expression]);
   if (Array.isArray(expression) && expression.length === 2)
     return joinSegments(expression, '-');
-
-  throw new TypeError(
-    'Invalid character set expression. Must be a string, number or a 2-element array.'
-  );
+  return joinSegments([expression]);
 };
 
 const toAnything = prefix =>
