@@ -49,36 +49,31 @@ const backReference = (reference) => {
   if (typeof reference === "string") return new RegExp(`\\k<${reference}>`);
   throw new TypeError("Invalid back reference. Must be a number or a string.");
 };
-const toGroup = (expressions, options) => {
+const toGroup = (expressions, prefix) => {
   const expression = joinSegments(toSegments(...expressions)).source;
-  const { capture, name } = options;
-  if (name) return new RegExp(`(?<${name}>${expression})`);
-  if (capture) return new RegExp(`(${expression})`);
-  return new RegExp(`(?:${expression})`);
+  return new RegExp(`(${prefix}${expression})`);
 };
-const captureGroup = (...expressions) => toGroup(expressions, { capture: true });
-const nonCaptureGroup = (...expressions) => toGroup(expressions, { capture: false });
+const captureGroup = (...expressions) => toGroup(expressions, "");
+const nonCaptureGroup = (...expressions) => toGroup(expressions, "?:");
 const namedGroup = (options, ...expressions) => {
   const { name } = options;
   if (!name || typeof name !== "string")
     throw new TypeError("Named groups must have a name.");
-  return toGroup(expressions, { name });
+  return toGroup(expressions, `?<${name}>`);
 };
-const concat = (...expressions) => nonCaptureGroup(...expressions);
+const concat = nonCaptureGroup;
 const or = (...expressions) => nonCaptureGroup(joinSegments(toSegments(...expressions), "|"));
-const toLookAround = (expressions, options) => {
-  const expression = concat(...toSegments(...expressions)).source;
-  const prefix = `?${options.lookbehind ? "<" : ""}${options.negative ? "!" : "="}`;
-  return new RegExp(`(${prefix}${expression})`);
-};
-const lookahead = (...expressions) => toLookAround(expressions, { lookbehind: false, negative: false });
-const negativeLookahead = (...expressions) => toLookAround(expressions, { lookbehind: false, negative: true });
-const lookbehind = (...expressions) => toLookAround(expressions, { lookbehind: true, negative: false });
-const negativeLookbehind = (...expressions) => toLookAround(expressions, { lookbehind: true, negative: true });
-const toQuantifier = (expressions, options) => {
+const toLookAround = (expressions, prefix) => {
   const expression = nonCaptureGroup(...toSegments(...expressions)).source;
-  const { suffix, lazy } = options;
-  return new RegExp(`${expression}${suffix}${lazy ? "?" : ""}`);
+  return new RegExp(`(?${prefix}${expression})`);
+};
+const lookahead = (...expressions) => toLookAround(expressions, "=");
+const negativeLookahead = (...expressions) => toLookAround(expressions, "!");
+const lookbehind = (...expressions) => toLookAround(expressions, "<=");
+const negativeLookbehind = (...expressions) => toLookAround(expressions, "<!");
+const toQuantifier = (expressions, suffix) => {
+  const expression = nonCaptureGroup(...toSegments(...expressions)).source;
+  return new RegExp(`${expression}${suffix}`);
 };
 const toRepeat = (expressions, options) => {
   const { times, lazy } = options;
@@ -93,32 +88,48 @@ const toRepeat = (expressions, options) => {
     );
   const [start, end] = [min ?? 0, max ?? ""];
   const suffix = start === end ? `{${start}}` : `{${start},${end}}`;
-  return toQuantifier(expressions, { suffix, lazy });
+  return toQuantifier(expressions, lazy ? `${suffix}?` : suffix);
 };
-const zeroOrOne = (...expressions) => toQuantifier(expressions, { suffix: "?" });
-const zeroOrOneLazy = (...expressions) => toQuantifier(expressions, { suffix: "?", lazy: true });
-const oneOrMore = (...expressions) => toQuantifier(expressions, { suffix: "+" });
-const oneOrMoreLazy = (...expressions) => toQuantifier(expressions, { suffix: "+", lazy: true });
-const zeroOrMore = (...expressions) => toQuantifier(expressions, { suffix: "*" });
-const zeroOrMoreLazy = (...expressions) => toQuantifier(expressions, { suffix: "*", lazy: true });
+const zeroOrOne = (...expressions) => toQuantifier(expressions, "?");
+const zeroOrOneLazy = (...expressions) => toQuantifier(expressions, "??");
+const oneOrMore = (...expressions) => toQuantifier(expressions, "+");
+const oneOrMoreLazy = (...expressions) => toQuantifier(expressions, "+?");
+const zeroOrMore = (...expressions) => toQuantifier(expressions, "*");
+const zeroOrMoreLazy = (...expressions) => toQuantifier(expressions, "*?");
 const repeat = (options, ...expressions) => toRepeat(expressions, options);
 const repeatLazy = (options, ...expressions) => toRepeat(expressions, { ...options, lazy: true });
-const startOfLine = new RegExp("^");
-const endOfLine = new RegExp("$");
-const wordBoundary = new RegExp(String.raw`\b`);
-const nonWordBoundary = new RegExp(String.raw`\B`);
-const digit = new RegExp(String.raw`\d`);
-const nonDigit = new RegExp(String.raw`\D`);
-const wordCharacter = new RegExp(String.raw`\w`);
-const nonWordCharacter = new RegExp(String.raw`\W`);
-const whitespaceCharacter = new RegExp(String.raw`\s`);
-const nonWhitespaceCharacter = new RegExp(String.raw`\S`);
-const anyCharacter = new RegExp(".");
-const anything = new RegExp(".*");
-const something = new RegExp(".+");
+const startOfLine = /^/;
+const endOfLine = /$/;
+const wordBoundary = /\b/;
+const nonWordBoundary = /\B/;
+const digit = /\d/;
+const nonDigit = /\D/;
+const wordCharacter = /\w/;
+const nonWordCharacter = /\W/;
+const whitespaceCharacter = /\s/;
+const nonWhitespaceCharacter = /\S/;
+const anyCharacter = /./;
+const anything = /.*/;
+const something = /.+/;
+const toCharacterSet = (expression) => {
+  if (typeof expression === "string" || typeof expression === "number")
+    return toSegment(expression);
+  if (Array.isArray(expression) && expression.length === 2)
+    return joinSegments(toSegments(...expression), "-");
+  throw new TypeError(
+    "Invalid character set expression. Must be a string, number or a 2-element array."
+  );
+};
+const toAnything = (prefix, ...expressions) => new RegExp(
+  `[${prefix}${joinSegments(expressions.map(toCharacterSet), "|").source}]`
+);
+const anythingFrom = (...expressions) => toAnything("", ...expressions);
+const anythingBut = (...expressions) => toAnything("^", ...expressions);
 export {
   anyCharacter,
   anything,
+  anythingBut,
+  anythingFrom,
   backReference,
   captureGroup,
   concat,

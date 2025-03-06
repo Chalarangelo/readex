@@ -1,10 +1,9 @@
 import { toSegments } from './utils.js';
 import { nonCaptureGroup } from './group.js';
 
-const toQuantifier = (expressions, options) => {
+const toQuantifier = (expressions, suffix) => {
   const expression = nonCaptureGroup(...toSegments(...expressions)).source;
-  const { suffix, lazy } = options;
-  return new RegExp(`${expression}${suffix}${lazy ? '?' : ''}`);
+  return new RegExp(`${expression}${suffix}`);
 };
 
 const toRepeat = (expressions, options) => {
@@ -30,7 +29,7 @@ const toRepeat = (expressions, options) => {
   const [start, end] = [min ?? 0, max ?? ''];
   const suffix = start === end ? `{${start}}` : `{${start},${end}}`;
 
-  return toQuantifier(expressions, { suffix, lazy });
+  return toQuantifier(expressions, lazy ? `${suffix}?` : suffix);
 };
 
 /**
@@ -39,8 +38,7 @@ const toRepeat = (expressions, options) => {
  * @param {...(RegExp|string)} expressions - The expressions to group.
  * @returns {RegExp} The new group segment.
  */
-export const zeroOrOne = (...expressions) =>
-  toQuantifier(expressions, { suffix: '?' });
+export const zeroOrOne = (...expressions) => toQuantifier(expressions, '?');
 
 /**
  * Creates a new non-capturing group segment that lazily matches the expressions zero or one time.
@@ -49,7 +47,7 @@ export const zeroOrOne = (...expressions) =>
  * @returns {RegExp} The new group segment.
  */
 export const zeroOrOneLazy = (...expressions) =>
-  toQuantifier(expressions, { suffix: '?', lazy: true });
+  toQuantifier(expressions, '??');
 
 /**
  * Creates a new non-capturing group segment that greedily matches the expressions one or more times.
@@ -57,8 +55,7 @@ export const zeroOrOneLazy = (...expressions) =>
  * @param {...(RegExp|string)} expressions - The expressions to group.
  * @returns {RegExp} The new group segment.
  */
-export const oneOrMore = (...expressions) =>
-  toQuantifier(expressions, { suffix: '+' });
+export const oneOrMore = (...expressions) => toQuantifier(expressions, '+');
 
 /**
  * Creates a new non-capturing group segment that lazily matches the expressions one or more times.
@@ -67,7 +64,7 @@ export const oneOrMore = (...expressions) =>
  * @returns {RegExp} The new group segment.
  */
 export const oneOrMoreLazy = (...expressions) =>
-  toQuantifier(expressions, { suffix: '+', lazy: true });
+  toQuantifier(expressions, '+?');
 
 /**
  * Creates a new non-capturing group segment that greedily matches the expressions zero or more times.
@@ -75,8 +72,7 @@ export const oneOrMoreLazy = (...expressions) =>
  * @param {...(RegExp|string)} expressions - The expressions to group.
  * @returns {RegExp} The new group segment.
  */
-export const zeroOrMore = (...expressions) =>
-  toQuantifier(expressions, { suffix: '*' });
+export const zeroOrMore = (...expressions) => toQuantifier(expressions, '*');
 
 /**
  * Creates a new non-capturing group segment that lazily matches the expressions zero or more times.
@@ -85,7 +81,7 @@ export const zeroOrMore = (...expressions) =>
  * @returns {RegExp} The new group segment.
  */
 export const zeroOrMoreLazy = (...expressions) =>
-  toQuantifier(expressions, { suffix: '*', lazy: true });
+  toQuantifier(expressions, '*?');
 
 /**
  * Creates a new non-capturing group segment that greedily matches the expressions a specific number of times.

@@ -2,65 +2,65 @@
  * An anchor segment that matches the start of a line.
  * In non-multi-line mode, it matches the start of the string.
  */
-export const startOfLine = new RegExp('^');
+export const startOfLine = /^/;
 
 /**
  * An anchor segment that matches the end of a line.
  * In non-multi-line mode, it matches the end of the string.
  */
-export const endOfLine = new RegExp('$');
+export const endOfLine = /$/;
 
 /**
  * An anchor segment that matches the start of a word boundary.
  */
-export const wordBoundary = new RegExp(String.raw`\b`);
+export const wordBoundary = /\b/;
 
 /**
  * An anchor segment that matches the end of a word boundary.
  */
-export const nonWordBoundary = new RegExp(String.raw`\B`);
+export const nonWordBoundary = /\B/;
 
 /**
  * A character class segment that matches any digit.
  */
-export const digit = new RegExp(String.raw`\d`);
+export const digit = /\d/;
 
 /**
  * A character class segment that matches any non-digit.
  */
-export const nonDigit = new RegExp(String.raw`\D`);
+export const nonDigit = /\D/;
 
 /**
  * A character class segment that matches any word character.
  */
-export const wordCharacter = new RegExp(String.raw`\w`);
+export const wordCharacter = /\w/;
 
 /**
  * A character class segment that matches any non-word character.
  */
-export const nonWordCharacter = new RegExp(String.raw`\W`);
+export const nonWordCharacter = /\W/;
 
 /**
  * A character class segment that matches any whitespace character.
  */
-export const whitespaceCharacter = new RegExp(String.raw`\s`);
+export const whitespaceCharacter = /\s/;
 
 /**
  * A character class segment that matches any non-whitespace character.
  */
-export const nonWhitespaceCharacter = new RegExp(String.raw`\S`);
+export const nonWhitespaceCharacter = /\S/;
 
 /**
  * A wildcard segment that matches any single character (/.).
  */
-export const anyCharacter = new RegExp('.');
+export const anyCharacter = /./;
 
 /**
  * A wildcard segment that matches any sequence of characters (/.*).
  */
-export const anything = new RegExp('.*');
+export const anything = /.*/;
 
 /**
  * A wildcard segment that matches any single character except line terminators (/./).
  */
-export const something = new RegExp('.+');
+export const something = /.+/;

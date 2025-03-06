@@ -1,12 +1,8 @@
 import { toSegments, joinSegments } from './utils.js';
 
-const toGroup = (expressions, options) => {
+const toGroup = (expressions, prefix) => {
   const expression = joinSegments(toSegments(...expressions)).source;
-  const { capture, name } = options;
-
-  if (name) return new RegExp(`(?<${name}>${expression})`);
-  if (capture) return new RegExp(`(${expression})`);
-  return new RegExp(`(?:${expression})`);
+  return new RegExp(`(${prefix}${expression})`);
 };
 
 /**
@@ -15,8 +11,7 @@ const toGroup = (expressions, options) => {
  * @param {...(RegExp|string)} expressions - The expressions to group.
  * @returns {RegExp} The new group segment.
  */
-export const captureGroup = (...expressions) =>
-  toGroup(expressions, { capture: true });
+export const captureGroup = (...expressions) => toGroup(expressions, '');
 
 /**
  * Creates a new non-capturing group segment with the provided expressions.
@@ -24,8 +19,7 @@ export const captureGroup = (...expressions) =>
  * @param {...(RegExp|string)} expressions - The expressions to group.
  * @returns {RegExp} The new group segment.
  */
-export const nonCaptureGroup = (...expressions) =>
-  toGroup(expressions, { capture: false });
+export const nonCaptureGroup = (...expressions) => toGroup(expressions, '?:');
 
 /**
  * Creates a new named group segment with the provided expressions.
@@ -40,7 +34,7 @@ export const namedGroup = (options, ...expressions) => {
   const { name } = options;
   if (!name || typeof name !== 'string')
     throw new TypeError('Named groups must have a name.');
-  return toGroup(expressions, { name });
+  return toGroup(expressions, `?<${name}>`);
 };
 
 /**
@@ -49,7 +43,7 @@ export const namedGroup = (options, ...expressions) => {
  * @param {...(RegExp|string)} expressions - The expressions to be combined.
  * @returns {RegExp} The combined expression as a non-capturing group segment.
  */
-export const concat = (...expressions) => nonCaptureGroup(...expressions);
+export const concat = nonCaptureGroup;
 
 /**
  * Combines multiple expressions into a single non-capturing group segment separated by the OR (`|`) operator.
