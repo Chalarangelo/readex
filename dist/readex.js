@@ -50,22 +50,22 @@ const backReference = (reference) => {
   if (typeof reference === "string") return new RegExp(`\\k<${reference}>`);
   throw new TypeError("Invalid back reference. Must be a number or a string.");
 };
-const toGroup = (expressions, prefix) => new RegExp(`(${prefix}${joinSegments(expressions).source})`);
-const captureGroup = (...expressions) => toGroup(expressions, "");
-const nonCaptureGroup = (...expressions) => toGroup(expressions, "?:");
+const toGroup = (prefix) => (...expressions) => new RegExp(`(${prefix}${joinSegments(expressions).source})`);
+const captureGroup = toGroup("");
+const nonCaptureGroup = toGroup("?:");
 const namedGroup = ({ name }, ...expressions) => {
   if (!name || typeof name !== "string")
     throw new TypeError("Named groups must have a name.");
-  return toGroup(expressions, `?<${name}>`);
+  return toGroup(`?<${name}>`)(...expressions);
 };
 const concat = nonCaptureGroup;
 const or = (...expressions) => nonCaptureGroup(joinSegments(expressions, "|"));
-const toLookAround = (expressions, prefix) => new RegExp(`(?${prefix}${nonCaptureGroup(...expressions).source})`);
-const lookahead = (...expressions) => toLookAround(expressions, "=");
-const negativeLookahead = (...expressions) => toLookAround(expressions, "!");
-const lookbehind = (...expressions) => toLookAround(expressions, "<=");
-const negativeLookbehind = (...expressions) => toLookAround(expressions, "<!");
-const toQuantifier = (expressions, suffix) => new RegExp(`${nonCaptureGroup(...expressions).source}${suffix}`);
+const toLookAround = (prefix) => (...expressions) => new RegExp(`(?${prefix}${nonCaptureGroup(...expressions).source})`);
+const lookahead = toLookAround("=");
+const negativeLookahead = toLookAround("!");
+const lookbehind = toLookAround("<=");
+const negativeLookbehind = toLookAround("<!");
+const toQuantifier = (suffix) => (...expressions) => new RegExp(`${nonCaptureGroup(...expressions).source}${suffix}`);
 const toRepeat = (expressions, options) => {
   const { times, lazy } = options;
   const [min = null, max = null] = Array.isArray(times) ? times : [times, times];
@@ -79,14 +79,14 @@ const toRepeat = (expressions, options) => {
     );
   const [start, end] = [min ?? 0, max ?? ""];
   const suffix = start === end ? `{${start}}` : `{${start},${end}}`;
-  return toQuantifier(expressions, lazy ? `${suffix}?` : suffix);
+  return toQuantifier(lazy ? `${suffix}?` : suffix)(...expressions);
 };
-const zeroOrOne = (...expressions) => toQuantifier(expressions, "?");
-const zeroOrOneLazy = (...expressions) => toQuantifier(expressions, "??");
-const oneOrMore = (...expressions) => toQuantifier(expressions, "+");
-const oneOrMoreLazy = (...expressions) => toQuantifier(expressions, "+?");
-const zeroOrMore = (...expressions) => toQuantifier(expressions, "*");
-const zeroOrMoreLazy = (...expressions) => toQuantifier(expressions, "*?");
+const zeroOrOne = toQuantifier("?");
+const zeroOrOneLazy = toQuantifier("??");
+const oneOrMore = toQuantifier("+");
+const oneOrMoreLazy = toQuantifier("+?");
+const zeroOrMore = toQuantifier("*");
+const zeroOrMoreLazy = toQuantifier("*?");
 const repeat = (options, ...expressions) => toRepeat(expressions, options);
 const repeatLazy = (options, ...expressions) => toRepeat(expressions, { ...options, lazy: true });
 const startOfLine = /^/;
@@ -111,11 +111,11 @@ const toCharacterSet = (expression) => {
     "Invalid character set expression. Must be a string, number or a 2-element array."
   );
 };
-const toAnything = (expressions, prefix) => new RegExp(
+const toAnything = (prefix) => (...expressions) => new RegExp(
   `[${prefix}${joinSegments(expressions.map(toCharacterSet), "|").source}]`
 );
-const anythingFrom = (...expressions) => toAnything(expressions, "");
-const anythingBut = (...expressions) => toAnything(expressions, "^");
+const anythingFrom = toAnything("");
+const anythingBut = toAnything("^");
 export {
   anyCharacter,
   anything,

@@ -1,7 +1,9 @@
 import { joinSegments } from './utils.js';
 
-const toGroup = (expressions, prefix) =>
-  new RegExp(`(${prefix}${joinSegments(expressions).source})`);
+const toGroup =
+  prefix =>
+  (...expressions) =>
+    new RegExp(`(${prefix}${joinSegments(expressions).source})`);
 
 /**
  * Creates a new capturing group segment with the provided expressions.
@@ -9,7 +11,7 @@ const toGroup = (expressions, prefix) =>
  * @param {...(RegExp|string)} expressions - The expressions to group.
  * @returns {RegExp} The new group segment.
  */
-export const captureGroup = (...expressions) => toGroup(expressions, '');
+export const captureGroup = toGroup('');
 
 /**
  * Creates a new non-capturing group segment with the provided expressions.
@@ -17,7 +19,7 @@ export const captureGroup = (...expressions) => toGroup(expressions, '');
  * @param {...(RegExp|string)} expressions - The expressions to group.
  * @returns {RegExp} The new group segment.
  */
-export const nonCaptureGroup = (...expressions) => toGroup(expressions, '?:');
+export const nonCaptureGroup = toGroup('?:');
 
 /**
  * Creates a new named group segment with the provided expressions.
@@ -31,7 +33,7 @@ export const nonCaptureGroup = (...expressions) => toGroup(expressions, '?:');
 export const namedGroup = ({ name }, ...expressions) => {
   if (!name || typeof name !== 'string')
     throw new TypeError('Named groups must have a name.');
-  return toGroup(expressions, `?<${name}>`);
+  return toGroup(`?<${name}>`)(...expressions);
 };
 
 /**
