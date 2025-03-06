@@ -427,5 +427,10 @@ describe('Integration tests', () => {
     ])('does not match invalid dates (%s)', date => {
       expect(readEx(segments)).not.toMatchString(date);
     });
+
+    it('creates the appropriate named groups', () => {
+      const matches = readEx(segments).exec('1970-01-01');
+      expect(matches.groups).toEqual({ year: '1970', month: '01', date: '01' });
+    });
   });
 });
