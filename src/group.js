@@ -1,9 +1,7 @@
-import { toSegments, joinSegments } from './utils.js';
+import { joinSegments } from './utils.js';
 
-const toGroup = (expressions, prefix) => {
-  const expression = joinSegments(toSegments(...expressions)).source;
-  return new RegExp(`(${prefix}${expression})`);
-};
+const toGroup = (expressions, prefix) =>
+  new RegExp(`(${prefix}${joinSegments(expressions).source})`);
 
 /**
  * Creates a new capturing group segment with the provided expressions.
@@ -30,8 +28,7 @@ export const nonCaptureGroup = (...expressions) => toGroup(expressions, '?:');
  * @throws {TypeError} If the group name is not a string.
  * @returns {RegExp} The new group segment.
  */
-export const namedGroup = (options, ...expressions) => {
-  const { name } = options;
+export const namedGroup = ({ name }, ...expressions) => {
   if (!name || typeof name !== 'string')
     throw new TypeError('Named groups must have a name.');
   return toGroup(expressions, `?<${name}>`);
@@ -52,4 +49,4 @@ export const concat = nonCaptureGroup;
  * @returns {RegExp} The combined expression as a non-capturing group segment.
  */
 export const or = (...expressions) =>
-  nonCaptureGroup(joinSegments(toSegments(...expressions), '|'));
+  nonCaptureGroup(joinSegments(expressions, '|'));

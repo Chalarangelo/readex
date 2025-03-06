@@ -1,10 +1,7 @@
-import { toSegments } from './utils.js';
 import { nonCaptureGroup } from './group.js';
 
-const toLookAround = (expressions, prefix) => {
-  const expression = nonCaptureGroup(...toSegments(...expressions)).source;
-  return new RegExp(`(?${prefix}${expression})`);
-};
+const toLookAround = (expressions, prefix) =>
+  new RegExp(`(?${prefix}${nonCaptureGroup(...expressions).source})`);
 
 /**
  * Creates a new loohahead group segment with the provided expressions.

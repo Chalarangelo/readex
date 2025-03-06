@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { sanitize, toSegment, toSegments, joinSegments } from '#src/utils.js';
+import { sanitize, toSegment, joinSegments } from '#src/utils.js';
 
 describe('sanitize', () => {
   it.each([
@@ -67,7 +67,7 @@ describe('toSegment', () => {
   });
 });
 
-describe('toSegments', () => {
+describe('joinSegments', () => {
   describe.each([
     ['a single string', ['some value'], ['some value']],
     ['a single number', [123], ['123']],
@@ -83,29 +83,12 @@ describe('toSegments', () => {
     ['a string and a RegExp', ['a', /b/], ['a', 'b']],
     ['a string and a RegExp with flags', ['a', /b/gim], ['a', 'b']],
     ['multiple RegExps', [/a/, /b/], ['a', 'b']],
-  ])('when called with %s', (_, expressions, expected) => {
-    it('returns an array of RegExp segments', () => {
-      expect(toSegments(...expressions).map(seg => seg.source)).toEqual(
-        expected
-      );
-    });
-  });
-});
-
-describe('joinSegments', () => {
-  describe.each([
-    ['a single string', ['some value'], ['some value']],
-    ['multiple strings', ['a', 'b'], ['a', 'b']],
-    ['a string and a number', ['a', 123], ['a', '123']],
-    ['a string and a RegExp', ['a', /b/], ['a', 'b']],
-    ['a string and a RegExp with flags', ['a', /b/gim], ['a', 'b']],
-    ['multiple RegExps', [/a/, /b/], ['a', 'b']],
     ['a string, a RegExp, and a number', ['a', /b/, 123], ['a', 'b', '123']],
   ])('when called with %s', (_, expressions, expected) => {
     it.each(['', '-', '|'])('and a "%s" separator', separator => {
-      expect(
-        joinSegments(toSegments(...expressions), separator).source
-      ).toEqual(expected.join(separator));
+      expect(joinSegments(expressions, separator).source).toEqual(
+        expected.join(separator)
+      );
     });
   });
 });

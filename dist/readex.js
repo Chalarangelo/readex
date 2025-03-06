@@ -7,8 +7,9 @@ const toSegment = (expression) => {
   if (expression instanceof RegExp) return new RegExp(expression.source);
   return new RegExp(sanitize(expression));
 };
-const toSegments = (...expressions) => expressions.map(toSegment);
-const joinSegments = (segments, separator = "") => new RegExp(segments.map((s) => s.source).join(separator));
+const joinSegments = (expressions, separator = "") => new RegExp(
+  expressions.map(toSegment).map((s) => s.source).join(separator)
+);
 const DEFAULT_FLAGS = {
   dotAll: false,
   global: true,
@@ -43,38 +44,28 @@ const asFlags = (flags) => {
     )
   ).reduce((acc, [flag, value]) => value ? acc + FLAG_MAP[flag] : acc, "");
 };
-const readEx = (expressions, flags = {}) => new RegExp(joinSegments(toSegments(...expressions)).source, asFlags(flags));
+const readEx = (expressions, flags = {}) => new RegExp(joinSegments(expressions).source, asFlags(flags));
 const backReference = (reference) => {
   if (typeof reference === "number") return new RegExp(`\\${reference}`);
   if (typeof reference === "string") return new RegExp(`\\k<${reference}>`);
   throw new TypeError("Invalid back reference. Must be a number or a string.");
 };
-const toGroup = (expressions, prefix) => {
-  const expression = joinSegments(toSegments(...expressions)).source;
-  return new RegExp(`(${prefix}${expression})`);
-};
+const toGroup = (expressions, prefix) => new RegExp(`(${prefix}${joinSegments(expressions).source})`);
 const captureGroup = (...expressions) => toGroup(expressions, "");
 const nonCaptureGroup = (...expressions) => toGroup(expressions, "?:");
-const namedGroup = (options, ...expressions) => {
-  const { name } = options;
+const namedGroup = ({ name }, ...expressions) => {
   if (!name || typeof name !== "string")
     throw new TypeError("Named groups must have a name.");
   return toGroup(expressions, `?<${name}>`);
 };
 const concat = nonCaptureGroup;
-const or = (...expressions) => nonCaptureGroup(joinSegments(toSegments(...expressions), "|"));
-const toLookAround = (expressions, prefix) => {
-  const expression = nonCaptureGroup(...toSegments(...expressions)).source;
-  return new RegExp(`(?${prefix}${expression})`);
-};
+const or = (...expressions) => nonCaptureGroup(joinSegments(expressions, "|"));
+const toLookAround = (expressions, prefix) => new RegExp(`(?${prefix}${nonCaptureGroup(...expressions).source})`);
 const lookahead = (...expressions) => toLookAround(expressions, "=");
 const negativeLookahead = (...expressions) => toLookAround(expressions, "!");
 const lookbehind = (...expressions) => toLookAround(expressions, "<=");
 const negativeLookbehind = (...expressions) => toLookAround(expressions, "<!");
-const toQuantifier = (expressions, suffix) => {
-  const expression = nonCaptureGroup(...toSegments(...expressions)).source;
-  return new RegExp(`${expression}${suffix}`);
-};
+const toQuantifier = (expressions, suffix) => new RegExp(`${nonCaptureGroup(...expressions).source}${suffix}`);
 const toRepeat = (expressions, options) => {
   const { times, lazy } = options;
   const [min = null, max = null] = Array.isArray(times) ? times : [times, times];
@@ -113,18 +104,18 @@ const anything = /.*/;
 const something = /.+/;
 const toCharacterSet = (expression) => {
   if (typeof expression === "string" || typeof expression === "number")
-    return toSegment(expression);
+    return joinSegments([expression]);
   if (Array.isArray(expression) && expression.length === 2)
-    return joinSegments(toSegments(...expression), "-");
+    return joinSegments(expression, "-");
   throw new TypeError(
     "Invalid character set expression. Must be a string, number or a 2-element array."
   );
 };
-const toAnything = (prefix, ...expressions) => new RegExp(
+const toAnything = (expressions, prefix) => new RegExp(
   `[${prefix}${joinSegments(expressions.map(toCharacterSet), "|").source}]`
 );
-const anythingFrom = (...expressions) => toAnything("", ...expressions);
-const anythingBut = (...expressions) => toAnything("^", ...expressions);
+const anythingFrom = (...expressions) => toAnything(expressions, "");
+const anythingBut = (...expressions) => toAnything(expressions, "^");
 export {
   anyCharacter,
   anything,
