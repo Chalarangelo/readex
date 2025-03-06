@@ -1,4 +1,4 @@
-import { wrapSegments } from './utils.js';
+import { toSegments } from './utils.js';
 
 const toRepeatSuffix = times => {
   const [min = null, max = null] = Array.isArray(times)
@@ -28,7 +28,7 @@ const toRepeatSuffix = times => {
  * @param {...(RegExp|string)} expressions - The expressions to group.
  * @returns {RegExp} The new group segment.
  */
-export const zeroOrOne = wrapSegments(`(?:`, `)?`);
+export const zeroOrOne = toSegments(`(?:`, `)?`);
 
 /**
  * Creates a new non-capturing group segment that lazily matches the expressions zero or one time.
@@ -36,7 +36,7 @@ export const zeroOrOne = wrapSegments(`(?:`, `)?`);
  * @param {...(RegExp|string)} expressions - The expressions to group.
  * @returns {RegExp} The new group segment.
  */
-export const zeroOrOneLazy = wrapSegments(`(?:`, `)??`);
+export const zeroOrOneLazy = toSegments(`(?:`, `)??`);
 
 /**
  * Creates a new non-capturing group segment that greedily matches the expressions one or more times.
@@ -44,7 +44,7 @@ export const zeroOrOneLazy = wrapSegments(`(?:`, `)??`);
  * @param {...(RegExp|string)} expressions - The expressions to group.
  * @returns {RegExp} The new group segment.
  */
-export const oneOrMore = wrapSegments(`(?:`, `)+`);
+export const oneOrMore = toSegments(`(?:`, `)+`);
 
 /**
  * Creates a new non-capturing group segment that lazily matches the expressions one or more times.
@@ -52,7 +52,7 @@ export const oneOrMore = wrapSegments(`(?:`, `)+`);
  * @param {...(RegExp|string)} expressions - The expressions to group.
  * @returns {RegExp} The new group segment.
  */
-export const oneOrMoreLazy = wrapSegments(`(?:`, `)+?`);
+export const oneOrMoreLazy = toSegments(`(?:`, `)+?`);
 
 /**
  * Creates a new non-capturing group segment that greedily matches the expressions zero or more times.
@@ -60,7 +60,7 @@ export const oneOrMoreLazy = wrapSegments(`(?:`, `)+?`);
  * @param {...(RegExp|string)} expressions - The expressions to group.
  * @returns {RegExp} The new group segment.
  */
-export const zeroOrMore = wrapSegments(`(?:`, `)*`);
+export const zeroOrMore = toSegments(`(?:`, `)*`);
 
 /**
  * Creates a new non-capturing group segment that lazily matches the expressions zero or more times.
@@ -68,7 +68,7 @@ export const zeroOrMore = wrapSegments(`(?:`, `)*`);
  * @param {...(RegExp|string)} expressions - The expressions to group.
  * @returns {RegExp} The new group segment.
  */
-export const zeroOrMoreLazy = wrapSegments(`(?:`, `)*?`);
+export const zeroOrMoreLazy = toSegments(`(?:`, `)*?`);
 
 /**
  * Creates a new non-capturing group segment that greedily matches the expressions a specific number of times.
@@ -82,7 +82,7 @@ export const zeroOrMoreLazy = wrapSegments(`(?:`, `)*?`);
  * @returns {RegExp} The new group segment.
  */
 export const repeat = ({ times }, ...expressions) =>
-  wrapSegments('(?:', `)${toRepeatSuffix(times)}`)(...expressions);
+  toSegments('(?:', `)${toRepeatSuffix(times)}`)(...expressions);
 
 /**
  * Creates a new non-capturing group segment that lazily matches the expressions a specific number of times.
@@ -96,4 +96,4 @@ export const repeat = ({ times }, ...expressions) =>
  * @returns {RegExp} The new group segment.
  */
 export const repeatLazy = ({ times }, ...expressions) =>
-  wrapSegments('(?:', `)${toRepeatSuffix(times)}?`)(...expressions);
+  toSegments('(?:', `)${toRepeatSuffix(times)}?`)(...expressions);

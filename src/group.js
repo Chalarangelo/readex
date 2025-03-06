@@ -1,4 +1,4 @@
-import { wrapSegments } from './utils.js';
+import { toSegments } from './utils.js';
 
 /**
  * Creates a new capturing group segment with the provided expressions.
@@ -6,7 +6,7 @@ import { wrapSegments } from './utils.js';
  * @param {...(RegExp|string)} expressions - The expressions to group.
  * @returns {RegExp} The new group segment.
  */
-export const captureGroup = wrapSegments('(', ')');
+export const captureGroup = toSegments('(', ')');
 
 /**
  * Creates a new non-capturing group segment with the provided expressions.
@@ -14,7 +14,7 @@ export const captureGroup = wrapSegments('(', ')');
  * @param {...(RegExp|string)} expressions - The expressions to group.
  * @returns {RegExp} The new group segment.
  */
-export const nonCaptureGroup = wrapSegments('(?:', ')');
+export const nonCaptureGroup = toSegments('(?:', ')');
 
 /**
  * Creates a new named group segment with the provided expressions.
@@ -28,7 +28,7 @@ export const nonCaptureGroup = wrapSegments('(?:', ')');
 export const namedGroup = ({ name }, ...expressions) => {
   if (!name || typeof name !== 'string')
     throw new TypeError('Named groups must have a name.');
-  return wrapSegments(`(?<${name}>`, ')')(...expressions);
+  return toSegments(`(?<${name}>`, ')')(...expressions);
 };
 
 /**
@@ -45,4 +45,4 @@ export const concat = nonCaptureGroup;
  * @param {...(RegExp|string)} expressions - The expressions to be combined.
  * @returns {RegExp} The combined expression as a non-capturing group segment.
  */
-export const or = wrapSegments(`(?:`, ')', '|');
+export const or = toSegments(`(?:`, ')', '|');

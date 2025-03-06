@@ -1,4 +1,4 @@
-import { joinSegments, wrapSegments } from './utils.js';
+import { toSegments } from './utils.js';
 
 /**
  * Converts an expression to a character set.
@@ -9,12 +9,11 @@ import { joinSegments, wrapSegments } from './utils.js';
  */
 export const toCharacterSet = expression => {
   if (Array.isArray(expression) && expression.length === 2)
-    return joinSegments(expression, '-');
-  return joinSegments([expression]);
+    return toSegments('', '', '-')(...expression);
+  return toSegments()(expression);
 };
 
-const toAnything = prefix =>
-  wrapSegments(`[${prefix}`, ']', '|', toCharacterSet);
+const toAnything = prefix => toSegments(`[${prefix}`, ']', '|', toCharacterSet);
 
 /**
  * Creates a new segment that matches any character from the provided expressions.

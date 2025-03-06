@@ -7,11 +7,8 @@ const toSegment = (expression) => {
   if (expression instanceof RegExp) return new RegExp(expression.source);
   return new RegExp(sanitize(expression));
 };
-const joinSegments = (expressions, separator = "") => new RegExp(
-  expressions.map(toSegment).map((s) => s.source).join(separator)
-);
-const wrapSegments = (prefix = "", suffix = "", separator = "", mapFn = (x) => x) => (...expressions) => new RegExp(
-  `${prefix}${joinSegments(expressions.map(mapFn), separator).source}${suffix}`
+const toSegments = (prefix = "", suffix = "", separator = "", mapFn = (x) => x) => (...expressions) => new RegExp(
+  `${prefix}${expressions.map((e) => toSegment(mapFn(e)).source).join(separator)}${suffix}`
 );
 const DEFAULT_FLAGS = {
   dotAll: false,
@@ -47,25 +44,25 @@ const asFlags = (flags) => {
     )
   ).reduce((acc, [flag, value]) => value ? acc + FLAG_MAP[flag] : acc, "");
 };
-const readEx = (expressions, flags = {}) => new RegExp(joinSegments(expressions).source, asFlags(flags));
+const readEx = (expressions, flags = {}) => new RegExp(toSegments()(...expressions).source, asFlags(flags));
 const backReference = (reference) => {
   if (typeof reference === "number") return new RegExp(`\\${reference}`);
   if (typeof reference === "string") return new RegExp(`\\k<${reference}>`);
   throw new TypeError("Invalid back reference. Must be a number or a string.");
 };
-const captureGroup = wrapSegments("(", ")");
-const nonCaptureGroup = wrapSegments("(?:", ")");
+const captureGroup = toSegments("(", ")");
+const nonCaptureGroup = toSegments("(?:", ")");
 const namedGroup = ({ name }, ...expressions) => {
   if (!name || typeof name !== "string")
     throw new TypeError("Named groups must have a name.");
-  return wrapSegments(`(?<${name}>`, ")")(...expressions);
+  return toSegments(`(?<${name}>`, ")")(...expressions);
 };
 const concat = nonCaptureGroup;
-const or = wrapSegments(`(?:`, ")", "|");
-const lookahead = wrapSegments(`(?=(?:`, `))`);
-const negativeLookahead = wrapSegments(`(?!(?:`, `))`);
-const lookbehind = wrapSegments(`(?<=(?:`, `))`);
-const negativeLookbehind = wrapSegments(`(?<!(?:`, `))`);
+const or = toSegments(`(?:`, ")", "|");
+const lookahead = toSegments(`(?=(?:`, `))`);
+const negativeLookahead = toSegments(`(?!(?:`, `))`);
+const lookbehind = toSegments(`(?<=(?:`, `))`);
+const negativeLookbehind = toSegments(`(?<!(?:`, `))`);
 const toRepeatSuffix = (times) => {
   const [min = null, max = null] = Array.isArray(times) ? times : [times, times];
   let hasError = min === null && max === null;
@@ -79,14 +76,14 @@ const toRepeatSuffix = (times) => {
   const [start, end] = [min ?? 0, max ?? ""];
   return start === end ? `{${start}}` : `{${start},${end}}`;
 };
-const zeroOrOne = wrapSegments(`(?:`, `)?`);
-const zeroOrOneLazy = wrapSegments(`(?:`, `)??`);
-const oneOrMore = wrapSegments(`(?:`, `)+`);
-const oneOrMoreLazy = wrapSegments(`(?:`, `)+?`);
-const zeroOrMore = wrapSegments(`(?:`, `)*`);
-const zeroOrMoreLazy = wrapSegments(`(?:`, `)*?`);
-const repeat = ({ times }, ...expressions) => wrapSegments("(?:", `)${toRepeatSuffix(times)}`)(...expressions);
-const repeatLazy = ({ times }, ...expressions) => wrapSegments("(?:", `)${toRepeatSuffix(times)}?`)(...expressions);
+const zeroOrOne = toSegments(`(?:`, `)?`);
+const zeroOrOneLazy = toSegments(`(?:`, `)??`);
+const oneOrMore = toSegments(`(?:`, `)+`);
+const oneOrMoreLazy = toSegments(`(?:`, `)+?`);
+const zeroOrMore = toSegments(`(?:`, `)*`);
+const zeroOrMoreLazy = toSegments(`(?:`, `)*?`);
+const repeat = ({ times }, ...expressions) => toSegments("(?:", `)${toRepeatSuffix(times)}`)(...expressions);
+const repeatLazy = ({ times }, ...expressions) => toSegments("(?:", `)${toRepeatSuffix(times)}?`)(...expressions);
 const startOfLine = /^/;
 const endOfLine = /$/;
 const wordBoundary = /\b/;
@@ -102,10 +99,10 @@ const anything = /.*/;
 const something = /.+/;
 const toCharacterSet = (expression) => {
   if (Array.isArray(expression) && expression.length === 2)
-    return joinSegments(expression, "-");
-  return joinSegments([expression]);
+    return toSegments("", "", "-")(...expression);
+  return toSegments()(expression);
 };
-const toAnything = (prefix) => wrapSegments(`[${prefix}`, "]", "|", toCharacterSet);
+const toAnything = (prefix) => toSegments(`[${prefix}`, "]", "|", toCharacterSet);
 const anythingFrom = toAnything("");
 const anythingBut = toAnything("^");
 export {

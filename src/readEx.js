@@ -1,4 +1,4 @@
-import { joinSegments } from './utils.js';
+import { toSegments } from './utils.js';
 import { asFlags } from './flags.js';
 
 /**
@@ -9,6 +9,6 @@ import { asFlags } from './flags.js';
  * @returns {RegExp} The resulting regular expression.
  */
 const readEx = (expressions, flags = {}) =>
-  new RegExp(joinSegments(expressions).source, asFlags(flags));
+  new RegExp(toSegments()(...expressions).source, asFlags(flags));
 
 export default readEx;

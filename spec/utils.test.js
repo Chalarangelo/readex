@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { sanitize, toSegment, joinSegments } from '#src/utils.js';
+import { sanitize, toSegment, toSegments } from '#src/utils.js';
 
 describe('sanitize', () => {
   it.each([
@@ -67,7 +67,7 @@ describe('toSegment', () => {
   });
 });
 
-describe('joinSegments', () => {
+describe('joinSegments (toSegments())', () => {
   describe.each([
     ['a single string', ['some value'], ['some value']],
     ['a single number', [123], ['123']],
@@ -86,7 +86,7 @@ describe('joinSegments', () => {
     ['a string, a RegExp, and a number', ['a', /b/, 123], ['a', 'b', '123']],
   ])('when called with %s', (_, expressions, expected) => {
     it.each(['', '-', '|'])('and a "%s" separator', separator => {
-      expect(joinSegments(expressions, separator).source).toEqual(
+      expect(toSegments('', '', separator)(...expressions).source).toEqual(
         expected.join(separator)
       );
     });
