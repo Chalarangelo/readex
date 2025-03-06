@@ -1,9 +1,6 @@
-import { joinSegments } from './utils.js';
+import { wrapSegments } from './utils.js';
 
-const toGroup =
-  prefix =>
-  (...expressions) =>
-    new RegExp(`(${prefix}${joinSegments(expressions).source})`);
+const toGroup = prefix => wrapSegments(`(${prefix}`, ')');
 
 /**
  * Creates a new capturing group segment with the provided expressions.
@@ -50,5 +47,4 @@ export const concat = nonCaptureGroup;
  * @param {...(RegExp|string)} expressions - The expressions to be combined.
  * @returns {RegExp} The combined expression as a non-capturing group segment.
  */
-export const or = (...expressions) =>
-  nonCaptureGroup(joinSegments(expressions, '|'));
+export const or = wrapSegments(`(?:`, ')', '|');

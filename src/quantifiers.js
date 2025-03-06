@@ -1,9 +1,6 @@
-import { nonCaptureGroup } from './group.js';
+import { wrapSegments } from './utils.js';
 
-const toQuantifier =
-  suffix =>
-  (...expressions) =>
-    new RegExp(`${nonCaptureGroup(...expressions).source}${suffix}`);
+const toQuantifier = suffix => wrapSegments(`(?:`, `)${suffix}`);
 
 const toRepeat = (expressions, options) => {
   const { times, lazy } = options;

@@ -10,6 +10,9 @@ const toSegment = (expression) => {
 const joinSegments = (expressions, separator = "") => new RegExp(
   expressions.map(toSegment).map((s) => s.source).join(separator)
 );
+const wrapSegments = (prefix = "", suffix = "", separator = "", mapFn = (x) => x) => (...expressions) => new RegExp(
+  `${prefix}${joinSegments(expressions.map(mapFn), separator).source}${suffix}`
+);
 const DEFAULT_FLAGS = {
   dotAll: false,
   global: true,
@@ -50,7 +53,7 @@ const backReference = (reference) => {
   if (typeof reference === "string") return new RegExp(`\\k<${reference}>`);
   throw new TypeError("Invalid back reference. Must be a number or a string.");
 };
-const toGroup = (prefix) => (...expressions) => new RegExp(`(${prefix}${joinSegments(expressions).source})`);
+const toGroup = (prefix) => wrapSegments(`(${prefix}`, ")");
 const captureGroup = toGroup("");
 const nonCaptureGroup = toGroup("?:");
 const namedGroup = ({ name }, ...expressions) => {
@@ -59,13 +62,13 @@ const namedGroup = ({ name }, ...expressions) => {
   return toGroup(`?<${name}>`)(...expressions);
 };
 const concat = nonCaptureGroup;
-const or = (...expressions) => nonCaptureGroup(joinSegments(expressions, "|"));
-const toLookAround = (prefix) => (...expressions) => new RegExp(`(?${prefix}${nonCaptureGroup(...expressions).source})`);
+const or = wrapSegments(`(?:`, ")", "|");
+const toLookAround = (prefix) => wrapSegments(`(?${prefix}(?:`, `))`);
 const lookahead = toLookAround("=");
 const negativeLookahead = toLookAround("!");
 const lookbehind = toLookAround("<=");
 const negativeLookbehind = toLookAround("<!");
-const toQuantifier = (suffix) => (...expressions) => new RegExp(`${nonCaptureGroup(...expressions).source}${suffix}`);
+const toQuantifier = (suffix) => wrapSegments(`(?:`, `)${suffix}`);
 const toRepeat = (expressions, options) => {
   const { times, lazy } = options;
   const [min = null, max = null] = Array.isArray(times) ? times : [times, times];
@@ -111,9 +114,7 @@ const toCharacterSet = (expression) => {
     "Invalid character set expression. Must be a string, number or a 2-element array."
   );
 };
-const toAnything = (prefix) => (...expressions) => new RegExp(
-  `[${prefix}${joinSegments(expressions.map(toCharacterSet), "|").source}]`
-);
+const toAnything = (prefix) => wrapSegments(`[${prefix}`, "]", "|", toCharacterSet);
 const anythingFrom = toAnything("");
 const anythingBut = toAnything("^");
 export {

@@ -1,4 +1,4 @@
-import { joinSegments } from './utils.js';
+import { joinSegments, wrapSegments } from './utils.js';
 
 /**
  * Converts an expression to a character set.
@@ -18,12 +18,8 @@ export const toCharacterSet = expression => {
   );
 };
 
-const toAnything =
-  prefix =>
-  (...expressions) =>
-    new RegExp(
-      `[${prefix}${joinSegments(expressions.map(toCharacterSet), '|').source}]`
-    );
+const toAnything = prefix =>
+  wrapSegments(`[${prefix}`, ']', '|', toCharacterSet);
 
 /**
  * Creates a new segment that matches any character from the provided expressions.

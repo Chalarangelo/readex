@@ -36,3 +36,23 @@ export const joinSegments = (expressions, separator = '') =>
       .map(s => s.source)
       .join(separator)
   );
+
+/**
+ * Wraps an array of expressions with the provided prefix and suffix,
+ * and joins them using the specified separator.
+ *
+ * @param {string} prefix - The prefix to add to the beginning of the expression.
+ * @param {string} suffix - The suffix to add to the end of the expression.
+ * @param {string} separator - The separator to use between expressions.
+ * @param {function} mapFn - A function to apply to each expression before joining.
+ * @returns {function} A function that takes an array of expressions and returns
+ *    a new RegExp object.
+ */
+export const wrapSegments =
+  (prefix = '', suffix = '', separator = '', mapFn = x => x) =>
+  (...expressions) =>
+    new RegExp(
+      `${prefix}${
+        joinSegments(expressions.map(mapFn), separator).source
+      }${suffix}`
+    );
