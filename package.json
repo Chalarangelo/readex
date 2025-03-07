@@ -7,7 +7,7 @@
   "module": "./dist/readex.js",
   "exports": {
     ".": {
-      "import": "./dist/readex.js"
+      "import": "./dist/readex.min.js"
     }
   },
   "imports": {
@@ -20,7 +20,9 @@
   },
   "scripts": {
     "test": "vitest",
-    "build": "vite build"
+    "build:min": "vite build --mode min",
+    "build:raw": "vite build --mode raw",
+    "build": "npm run build:min && npm run build:raw"
   },
   "repository": {
     "type": "git",
