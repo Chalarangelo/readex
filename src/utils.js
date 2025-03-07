@@ -46,8 +46,7 @@ export const toSegments =
  * @returns {RegExp} A new segment representing the character set.
  * @throws {TypeError} If the expression is not a string or a 2-element array.
  */
-export const toCharacterSet = expression => {
-  if (Array.isArray(expression) && expression.length === 2)
-    return toSegments('', '', '-')(...expression);
-  return toSegments()(expression);
-};
+export const toCharacterSet = expression =>
+  Array.isArray(expression) && expression.length === 2
+    ? toSegments('', '', '-')(...expression)
+    : toSegments()(expression);

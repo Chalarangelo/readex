@@ -24,11 +24,7 @@ const toSegments = (prefix = "", suffix = "", separator = "", mapFn = (x) => x, 
   `${prefix}${expressions.map((e) => toSegmentSource(mapFn(e))).join(separator)}${suffix}`,
   asFlags(flags)
 );
-const toCharacterSet = (expression) => {
-  if (Array.isArray(expression) && expression.length === 2)
-    return toSegments("", "", "-")(...expression);
-  return toSegments()(expression);
-};
+const toCharacterSet = (expression) => Array.isArray(expression) && expression.length === 2 ? toSegments("", "", "-")(...expression) : toSegments()(expression);
 const readEx = (expressions, flags) => toSegments("", "", "", (x) => x, flags)(...expressions);
 const backReference = (reference) => {
   if (typeof reference === "string")
