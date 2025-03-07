@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import './matchers.js';
 
-import readEx from '#src/readEx.js';
+import { readEx } from '#src/readEx.js';
 import {
   lookahead,
   lookbehind,

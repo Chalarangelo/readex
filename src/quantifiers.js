@@ -6,9 +6,7 @@ const toRepeatSuffix = times => {
   const [min = 0, max = null] = Array.isArray(times) ? times : [times, times];
 
   if ((max !== null && min > max) || !isValidTimes(min) || !isValidTimes(max))
-    throw new TypeError(
-      'Invalid times option: times must be either a number or an array of two numbers.'
-    );
+    throw new TypeError('Times must be a number or 2-number array.');
 
   return min === max ? `{${min}}` : `{${min},${max ?? ''}}`;
 };

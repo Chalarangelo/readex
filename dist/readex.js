@@ -1,52 +1,40 @@
-const DEFAULT_FLAGS = {
-  dotAll: false,
-  global: true,
-  ignoreCase: false,
-  multiline: true,
-  sticky: false,
-  unicode: false
-};
-const FLAG_MAP = {
-  dotAll: "s",
-  global: "g",
-  ignoreCase: "i",
-  multiline: "m",
-  sticky: "y",
-  unicode: "u"
-};
-const validateFlag = (flag) => {
-  if (!Object.keys(DEFAULT_FLAGS).includes(flag))
-    throw new TypeError(`Invalid flag: ${flag}`);
-  return flag;
+const FLAGS = {
+  dotAll: [false, "s"],
+  global: [true, "g"],
+  ignoreCase: [false, "i"],
+  multiline: [true, "m"],
+  sticky: [false, "y"],
+  unicode: [false, "u"]
 };
 const asFlags = (flags) => {
   if (!(flags instanceof Object))
-    throw new TypeError("flags must be an object");
-  return Object.entries(
-    Object.entries(flags).reduce(
-      (acc, [flag, value]) => {
-        if (value !== void 0) acc[validateFlag(flag)] = value;
-        return acc;
-      },
-      { ...DEFAULT_FLAGS }
-    )
-  ).reduce((acc, [flag, value]) => value ? acc + FLAG_MAP[flag] : acc, "");
+    throw new TypeError("Flags must be an object.");
+  return Object.keys({ ...FLAGS, ...flags }).reduce((acc, flag) => {
+    if (!(flag in FLAGS)) throw new TypeError("Invalid flag key.");
+    return flags[flag] ?? FLAGS[flag][0] ? acc + FLAGS[flag][1] : acc;
+  }, "");
 };
 const toSegmentSource = (expression) => {
   if (expression instanceof RegExp) return expression.source;
-  if (typeof expression === "string" || typeof expression === "number")
+  if (["string", "number"].includes(typeof expression))
     return new RegExp(`${expression}`.replace(/[|\\{}()[\]^$+*?.-]/g, "\\$&")).source;
-  throw new TypeError("Value must be a string or a number");
+  throw new TypeError("Expression must be a string or number");
 };
 const toSegments = (prefix = "", suffix = "", separator = "", mapFn = (x) => x, flags = {}) => (...expressions) => new RegExp(
   `${prefix}${expressions.map((e) => toSegmentSource(mapFn(e))).join(separator)}${suffix}`,
   asFlags(flags)
 );
+const toCharacterSet = (expression) => {
+  if (Array.isArray(expression) && expression.length === 2)
+    return toSegments("", "", "-")(...expression);
+  return toSegments()(expression);
+};
 const readEx = (expressions, flags) => toSegments("", "", "", (x) => x, flags)(...expressions);
 const backReference = (reference) => {
-  if (typeof reference === "number") return new RegExp(`\\${reference}`);
-  if (typeof reference === "string") return new RegExp(`\\k<${reference}>`);
-  throw new TypeError("Invalid back reference. Must be a number or a string.");
+  if (typeof reference === "string")
+    return toSegments(`\\k<${reference}`, ">")();
+  if (typeof reference === "number") return toSegments(`\\${reference}`)();
+  throw new TypeError("Reference must be a number or a string.");
 };
 const captureGroup = toSegments("(", ")");
 const nonCaptureGroup = toSegments("(?:", ")");
@@ -65,9 +53,7 @@ const isValidTimes = (val) => val === null || Number.isInteger(val) && val >= 0;
 const toRepeatSuffix = (times) => {
   const [min = 0, max = null] = Array.isArray(times) ? times : [times, times];
   if (max !== null && min > max || !isValidTimes(min) || !isValidTimes(max))
-    throw new TypeError(
-      "Invalid times option: times must be either a number or an array of two numbers."
-    );
+    throw new TypeError("Times must be a number or 2-number array.");
   return min === max ? `{${min}}` : `{${min},${max ?? ""}}`;
 };
 const zeroOrOne = toSegments(`(?:`, `)?`);
@@ -91,11 +77,6 @@ const nonWhitespaceCharacter = /\S/;
 const anyCharacter = /./;
 const anything = /.*/;
 const something = /.+/;
-const toCharacterSet = (expression) => {
-  if (Array.isArray(expression) && expression.length === 2)
-    return toSegments("", "", "-")(...expression);
-  return toSegments()(expression);
-};
 const anythingFrom = toSegments(`[`, "]", "|", toCharacterSet);
 const anythingBut = toSegments(`[^`, "]", "|", toCharacterSet);
 export {

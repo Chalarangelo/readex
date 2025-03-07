@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import readEx from '#src/readEx.js';
+import { readEx } from '#src/readEx.js';
 import { backReference } from '#src/backReference.js';
 
 describe('backReference', () => {

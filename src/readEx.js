@@ -7,7 +7,5 @@ import { toSegments } from './utils.js';
  * @param {Object} [flags={}] - An optional object specifying the flags to be applied to the regular expression.
  * @returns {RegExp} The resulting regular expression.
  */
-const readEx = (expressions, flags) =>
+export const readEx = (expressions, flags) =>
   toSegments('', '', '', x => x, flags)(...expressions);
-
-export default readEx;

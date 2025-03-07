@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { toSegmentSource, toSegments } from '#src/utils.js';
+import { toSegmentSource, toSegments, toCharacterSet } from '#src/utils.js';
 
 describe('toSegmentSource', () => {
   describe('when value is a RegExp instance', () => {
@@ -72,4 +72,45 @@ describe('toSegments', () => {
       });
     });
   });
+});
+
+describe('toCharacterSet', () => {
+  describe('when given a string, number or RegExp', () => {
+    it.each([
+      ['abc', 'abc'],
+      ['a-z', String.raw`a\-z`],
+      ['[ab]', String.raw`\[ab\]`],
+      ['[^a]', String.raw`\[\^a\]`],
+      [1, '1'],
+      [/ab/gm, 'ab'],
+      [/a-z/gm, 'a-z'],
+    ])(
+      'produces a segment that matches the characters exactly (%s) -> (%s)',
+      (expression, expected) => {
+        expect(toCharacterSet(expression).source).toEqual(expected);
+      }
+    );
+  });
+
+  describe('when given a 2-element array', () => {
+    it.each([
+      [['a', 'z'], String.raw`a-z`],
+      [['0', '9'], String.raw`0-9`],
+      [['A', 'Z'], String.raw`A-Z`],
+    ])(
+      'produces a segment that matches the character range (%s) -> (%s)',
+      (expression, expected) => {
+        expect(toCharacterSet(expression).source).toEqual(expected);
+      }
+    );
+  });
+
+  describe.each([['a,', 'b', 'c'], null, undefined, () => {}, {}])(
+    'when given anything else (%s) ',
+    value => {
+      it('should throw an error', () => {
+        expect(() => toCharacterSet(value)).toThrow();
+      });
+    }
+  );
 });

@@ -1,17 +1,4 @@
-import { toSegments } from './utils.js';
-
-/**
- * Converts an expression to a character set.
- *
- * @param {string | Array} expression - The expression to convert. Must be either a string or a 2-element array.
- * @returns {RegExp} A new segment representing the character set.
- * @throws {TypeError} If the expression is not a string or a 2-element array.
- */
-export const toCharacterSet = expression => {
-  if (Array.isArray(expression) && expression.length === 2)
-    return toSegments('', '', '-')(...expression);
-  return toSegments()(expression);
-};
+import { toSegments, toCharacterSet } from './utils.js';
 
 /**
  * Creates a new segment that matches any character from the provided expressions.

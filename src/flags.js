@@ -1,26 +1,10 @@
-export const DEFAULT_FLAGS = {
-  dotAll: false,
-  global: true,
-  ignoreCase: false,
-  multiline: true,
-  sticky: false,
-  unicode: false,
-};
-
-const FLAG_MAP = {
-  dotAll: 's',
-  global: 'g',
-  ignoreCase: 'i',
-  multiline: 'm',
-  sticky: 'y',
-  unicode: 'u',
-};
-
-const validateFlag = flag => {
-  if (!Object.keys(DEFAULT_FLAGS).includes(flag))
-    throw new TypeError(`Invalid flag: ${flag}`);
-
-  return flag;
+export const FLAGS = {
+  dotAll: [false, 's'],
+  global: [true, 'g'],
+  ignoreCase: [false, 'i'],
+  multiline: [true, 'm'],
+  sticky: [false, 'y'],
+  unicode: [false, 'u'],
 };
 
 /**
@@ -32,16 +16,10 @@ const validateFlag = flag => {
  */
 export const asFlags = flags => {
   if (!(flags instanceof Object))
-    throw new TypeError('flags must be an object');
+    throw new TypeError('Flags must be an object.');
 
-  return Object.entries(
-    Object.entries(flags).reduce(
-      (acc, [flag, value]) => {
-        if (value !== undefined) acc[validateFlag(flag)] = value;
-
-        return acc;
-      },
-      { ...DEFAULT_FLAGS }
-    )
-  ).reduce((acc, [flag, value]) => (value ? acc + FLAG_MAP[flag] : acc), '');
+  return Object.keys({ ...FLAGS, ...flags }).reduce((acc, flag) => {
+    if (!(flag in FLAGS)) throw new TypeError('Invalid flag key.');
+    return flags[flag] ?? FLAGS[flag][0] ? acc + FLAGS[flag][1] : acc;
+  }, '');
 };
